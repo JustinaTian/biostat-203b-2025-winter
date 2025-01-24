@@ -45,7 +45,7 @@ This exercise (and later in this course) uses the [MIMIC-IV data v3.1](https://p
 ```{bash}
 #| eval: true
 # content of mimic folder
-ls -l ~/mimic/
+ls -l ~/Desktop/203B/
 ```
 Refer to the documentation <https://physionet.org/content/mimiciv/3.1/> for details of data files. Do **not** put these data files into Git; they are big. Do **not** copy them into your directory. Do **not** decompress the gz data files. These create unnecessary big files and are not big-data-friendly practices. Read from the data folder `~/mimic` directly in following exercises. 
 
