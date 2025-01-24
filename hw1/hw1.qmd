@@ -50,7 +50,7 @@ Report. Here is the
 ```{bash}
 #| eval: true
 # content of mimic folder
-ls -l ~/Desktop/203B/
+ls -l ~/mimic/
 ```
 Refer to the documentation <https://physionet.org/content/mimiciv/3.1/> for details of data files. Do **not** put these data files into Git; they are big. Do **not** copy them into your directory. Do **not** decompress the gz data files. These create unnecessary big files and are not big-data-friendly practices. Read from the data folder `~/mimic` directly in following exercises. 
 
@@ -88,11 +88,11 @@ wget -nc http://www.gutenberg.org/cache/epub/42671/pg42671.txt
 Explain what `wget -nc` does. Do **not** put this text file `pg42671.txt` in Git. Complete the following loop to tabulate the number of times each of the four characters is mentioned using Linux commands.
 ```{bash}
 #| eval: false
-wget -nc http://www.gutenberg.org/cache/epub/42671/pg42671.txt
+wget -nc -q http://www.gutenberg.org/cache/epub/42671/pg42671.txt
 for char in Elizabeth Jane Lydia Darcy
 do
   echo $char:
-  # some bash commands here
+  grep -o -i "\b$char\b" pg42671.txt | wc -l | awk '{print $1}'
 done
 ```
 
@@ -117,13 +117,35 @@ head -n "$2" "$1" | tail -n "$3"
 Using `chmod` to make the file executable by the owner, and run
 ```{bash}
 #| eval: false
+chmod +x middle.sh
 ./middle.sh pg42671.txt 20 5
 ```
 Explain the output. Explain the meaning of `"$1"`, `"$2"`, and `"$3"` in this shell script. Why do we need the first line of the shell script?
+。。。
 
 ## Q5. More fun with Linux
 
 Try following commands in Bash and interpret the results: `cal`, `cal 2025`, `cal 9 1752` (anything unusual?), `date`, `hostname`, `arch`, `uname -a`, `uptime`, `who am i`, `who`, `w`, `id`, `last | head`, `echo {con,pre}{sent,fer}{s,ed}`, `time sleep 5`, `history | tail`.
+
+```{bash}
+#| eval: false
+cal
+cal 2025
+cal 9 1752
+date
+hostname
+arch
+uname -a
+uptime
+who am i
+who
+w
+id
+last | head
+echo {con,pre}{sent,fer}{s,ed}
+time sleep 5
+history | tail
+```
 
 ## Q6. Book
 
