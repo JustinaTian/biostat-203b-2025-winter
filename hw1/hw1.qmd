@@ -103,16 +103,16 @@ done
 #| eval: false
 echo 'hello, world' > test1.txt
 ```
-*Difference* > means overwrite.
-If the file test1.txt already exists, this command empties it and writes ‘hello, world’ to it.
-If test1.txt does not exist, this command creates a new file, test1.txt, and writes ‘hello, world’ to it.
-
 and
 ```{bash}
 #| eval: false
 echo 'hello, world' >> test2.txt
 ```
-*Difference* >> means append.
+*Difference* 
+1. > means overwrite.
+If the file test1.txt already exists, this command empties it and writes ‘hello, world’ to it.
+If test1.txt does not exist, this command creates a new file, test1.txt, and writes ‘hello, world’ to it. 
+2. >> means append.
 If the file test2.txt already exists, this command adds ‘hello, world’ to the end of the file without deleting the original contents.
 If test2.txt does not exist, the command creates a new file, test2.txt, and writes ‘hello, world’ to it.
 
@@ -133,6 +133,29 @@ chmod +x middle.sh
 
 Explain the output. Explain the meaning of `"$1"`, `"$2"`, and `"$3"` in this shell script. Why do we need the first line of the shell script?
 
+*Solution* 1. What this script does
+The script middle.sh is used to extract a specific number of lines in the middle from a file. The user provides the following parameters: File name; The last line to be read (end_line);
+Number of lines to extract (num_lines).
+
+head -n ‘$2’ ‘$1’: outputs the first 2 lines of file $1.
+tail -n ‘$3’: extracts the last $3 lines from the output of head.
+So, it extracts the last 3 lines from the first 2 lines of the file, and finally achieves the function of extracting specific lines from the middle of the file.
+
+‘$1": filename.
+‘$2": number of lines to pass to head.
+‘$3": number of lines to pass to tail.
+
+3. The first line of the script is: #!/bin/sh
+This is ‘shebang’. It tells the operating system which interpreter to use to run the script.
+In this case it is /bin/sh (the shell interpreter).
+Without this line of code, the script may not run correctly, or it may rely on the user's default shell (e.g. bash, zsh), which may be different for different systems.
+
+4. chmod +x middle.sh: Grants permission to execute the script (adds ‘executable’ permissions).
+. /middle.sh pg42671.txt 20 5: Run the script and pass parameters: File name: pg42671.txt.
+Reads from the first 20 lines of the file.
+Output the last 5 of these 20 lines instead.
+
+5. Output: This command extracts lines 16-20 of pg42671.txt. outputs the first 20 lines (head -n 20 pg42671.txt). outputs the last 5 lines from these 20 lines (tail -n 5).
 
 ## Q5. More fun with Linux
 
