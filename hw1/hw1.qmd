@@ -164,22 +164,97 @@ Try following commands in Bash and interpret the results: `cal`, `cal 2025`, `ca
 ```{bash}
 #| eval: false
 cal
+```
+
+Displays the calendar of the current month.
+Output A formatted calendar of the current month with the current date marked.
+
+```{bash}
 cal 2025
+```
+Displays the calendar of the entire year 2025.
+Output A grid with all the months in 2025.
+
+```{bash}
 cal 9 1752
+```
+Displays the calendar for September 1752.
+
+```{bash}
 date
+```
+Displays the current date and time.
+Output: Current system time in the format
+
+```{bash}
 hostname
+```
+Shows the name of the computer or network hostname.
+Output: The hostname of your machine.
+
+```{bash}
 arch
+```
+Displays the architecture of your system (e.g., x86_64, arm64).
+Output: System architecture.
+
+```{bash}
 uname -a
+```
+Displays detailed information about the system kernel, architecture, and operating system.
+
+```{bash}
 uptime
+```
+Shows how long the system has been running, the number of active users, and system load averages.
+
+```{bash}
 who am i
+```
+Shows the logged-in user and their session details.
+Output: Current user information
+
+```{bash}
 who
+```
+Lists all users currently logged into the system.
+Output: Multiple lines showing usernames, terminals, and login times.
+
+```{bash}
 w
+```
+Displays who is logged in and what they are doing.
+Output: A summary including uptime, number of users, and their processes.
+
+```{bash}
 id
+```
+Shows the user ID (UID) and group ID (GID) of the current user.
+
+```{bash}
 last | head
+```
+Displays the login history of users.
+| head limits the output to the first 10 lines.
+Output: A list of recent logins
+
+```{bash}
 echo {con,pre}{sent,fer}{s,ed}
+```
+Generates all possible combinations of words formed by the braces.
+
+```{bash}
 time sleep 5
+```
+Measures the time taken to execute the command sleep 5, which pauses for 5 seconds.
+Output: Real, user, and system time for the command execution
+
+```{bash}
 history | tail
 ```
+Displays the last 10 commands in the command history.
+Output: List of the last 10 commands you executed in the terminal.
+
 *Solution* Q5 is completed.
 
 ## Q6. Book
@@ -203,6 +278,6 @@ For grading purpose, include a screenshot of Section 4.1.5 of the book here.
 
 ::: {figure}
 ![epub](images/screenshot 2025-01-24 at 22.33.23.png)
-*PS* The Books app on macOS can open the EPUB file, so I used it and took a screenshot to demonstrate my work.
+The Books app on macOS can open the EPUB file, so I used it and took a screenshot to demonstrate my work.
 :::
 
