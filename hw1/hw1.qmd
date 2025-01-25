@@ -35,6 +35,8 @@ sessionInfo()
 
 5. After this course, you can make this repository public and use it to demonstrate your skill sets on job market.
 
+*Solution* Q1 is completed.
+
 ## Q2. Data ethics training
 
 This exercise (and later in this course) uses the [MIMIC-IV data v3.1](https://physionet.org/content/mimiciv/3.1/), a freely accessible critical care database developed by the MIT Lab for Computational Physiology. Follow the instructions at <https://mimic.mit.edu/docs/gettingstarted/> to (1) complete the CITI `Data or Specimens Only Research` course and (2) obtain the PhysioNet credential for using the MIMIC-IV data. Display the verification links to your completion report and completion certificate here. **You must complete Q2 before working on the remaining questions.** (Hint: The CITI training takes a few hours and the PhysioNet credentialing takes a couple days; do not leave it to the last minute.)
@@ -50,7 +52,7 @@ Report. Here is the
 ```{bash}
 #| eval: true
 # content of mimic folder
-ls -l ~/mimic/
+# ls -l ~/mimic/
 ```
 Refer to the documentation <https://physionet.org/content/mimiciv/3.1/> for details of data files. Do **not** put these data files into Git; they are big. Do **not** copy them into your directory. Do **not** decompress the gz data files. These create unnecessary big files and are not big-data-friendly practices. Read from the data folder `~/mimic` directly in following exercises. 
 
@@ -101,11 +103,18 @@ done
 #| eval: false
 echo 'hello, world' > test1.txt
 ```
+*Difference* > means overwrite.
+If the file test1.txt already exists, this command empties it and writes ‘hello, world’ to it.
+If test1.txt does not exist, this command creates a new file, test1.txt, and writes ‘hello, world’ to it.
+
 and
 ```{bash}
 #| eval: false
 echo 'hello, world' >> test2.txt
 ```
+*Difference* >> means append.
+If the file test2.txt already exists, this command adds ‘hello, world’ to the end of the file without deleting the original contents.
+If test2.txt does not exist, the command creates a new file, test2.txt, and writes ‘hello, world’ to it.
 
 3. Using your favorite text editor (e.g., `vi`), type the following and save the file as `middle.sh`:
 ```{bash eval=FALSE}
@@ -114,14 +123,16 @@ echo 'hello, world' >> test2.txt
 # Usage: bash middle.sh filename end_line num_lines
 head -n "$2" "$1" | tail -n "$3"
 ```
+
 Using `chmod` to make the file executable by the owner, and run
 ```{bash}
 #| eval: false
 chmod +x middle.sh
 ./middle.sh pg42671.txt 20 5
 ```
+
 Explain the output. Explain the meaning of `"$1"`, `"$2"`, and `"$3"` in this shell script. Why do we need the first line of the shell script?
-。。。
+
 
 ## Q5. More fun with Linux
 
@@ -146,6 +157,7 @@ echo {con,pre}{sent,fer}{s,ed}
 time sleep 5
 history | tail
 ```
+*Solution* Q5 is completed.
 
 ## Q6. Book
 
@@ -156,3 +168,18 @@ history | tail
 The point of this exercise is (1) to obtain the book for free and (2) to see an example how a complicated project such as a book can be organized in a reproducible way. Use `sudo apt install PKGNAME` to install required Ubuntu packages and `tlmgr install PKGNAME` to install missing TexLive packages.
 
 For grading purpose, include a screenshot of Section 4.1.5 of the book here.
+
+*Solution* 
+::: {figure}
+![pdf screenshot](/Users/justinatian/Desktop/Screenshot 2025-01-24 at 22.18.28.png)
+:::
+
+::: {figure}
+![html screenshot](/Users/justinatian/Desktop/Screenshot 2025-01-24 at 22.30.23.png)
+:::
+
+::: {figure}
+![epub](/Users/justinatian/Desktop/screenshot 2025-01-24 at 22.33.23.png)
+*PS* The Books app on macOS can open the EPUB file, so I used it and took a screenshot to demonstrate my work.
+:::
+
