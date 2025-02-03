@@ -49,3 +49,6 @@ po/*~
 rsconnect/
 
 .DS_Store
+hw1/middle.sh
+hw1/test1.txt
+hw1/test2.txt
