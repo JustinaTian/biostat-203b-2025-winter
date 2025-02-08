@@ -215,7 +215,8 @@ Display the first 10 lines of the new file `labevents_filtered.csv.gz`. How many
 ```{bash}
 zcat < ~/mimic/hosp/labevents.csv.gz | awk -F',' '{if ($5 == 50912 || \
 $5 == 50971 || $5 == 50983 || $5 == 50902 || $5 == 50882 || $5 == 51221 || \
-$5 == 51301 || $5 == 50931) print $2 "," $5 "," $7 "," $10}' | gzip > ~/203b/hw/hw2/labevents_filtered.csv.gz
+$5 == 51301 || $5 == 50931) print $2 "," $5 "," $7 "," $10}' 
+| gzip > ~/203b/hw/hw2/labevents_filtered.csv.gz
 ```
 
 ```{bash}
