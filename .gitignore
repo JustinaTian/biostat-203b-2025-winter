@@ -52,3 +52,6 @@ rsconnect/
 hw1/middle.sh
 hw1/test1.txt
 hw1/test2.txt
+hw/hw2/labevents.csv
+hw/hw2/labevents_filtered.csv.gz
+hw/hw2/labevents_parquet/
