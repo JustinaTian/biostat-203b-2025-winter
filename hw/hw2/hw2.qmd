@@ -41,12 +41,10 @@ In this exercise, we explore various tools for ingesting the [MIMIC-IV](https://
 Display the contents of MIMIC `hosp` and `icu` data folders:
 
 ```{bash}
-#| eval: false
 ls -l ~/mimic/hosp
 ```
 
 ```{bash}
-#| eval: false
 ls -l ~/mimic/icu
 ```
 
@@ -57,7 +55,6 @@ ls -l ~/mimic/icu
 There are quite a few utilities in R for reading plain text data files. Let us test the speed of reading a moderate sized compressed csv file, `admissions.csv.gz`, by three functions: `read.csv` in base R, `read_csv` in tidyverse, and `fread` in the data.table package.
 
 ```{r}
-#| eval: false
 path <- "~/mimic/hosp/admissions.csv.gz"
 
 # `read.csv` (base R) speed, memory, and data types
@@ -68,7 +65,6 @@ mem_base <- pryr::object_size(df_base)
 glimpse(df_base)
 ```
 ```{r}
-#| eval: false
 # `read_csv` (tidyverse) speed, memory, and data types
 tidyverse <- system.time({
   df_tidyverse <- read_csv(gzfile(path))
@@ -78,7 +74,6 @@ glimpse(df_tidyverse)
 ```
 
 ```{r}
-#| eval: false
 # `fread` (data.table) speed, memory, and data types
 fread <- system.time({
   df_fread <- fread(path)
@@ -87,7 +82,6 @@ mem_fread <- pryr::object_size(df_fread)
 glimpse(df_fread)
 ```
 ```{r}
-#| eval: false
 result <- data.frame(
   read_types = c("Base R (read.csv)", "Tidyverse (read_csv)", "Data.table (fread)"),
   speed_sec = c(baseR[3], tidyverse[3], fread[3]),
@@ -118,7 +112,6 @@ read.csv from base R was the most memory-intensive, using 200.10 MB of memory.
 Re-ingest `admissions.csv.gz` by indicating appropriate column data types in `read_csv`. Does the run time change? How much memory does the result tibble use? (Hint: `col_types` argument in `read_csv`.)
 
 ```{r}
-#| eval: false
 # Check summary of the deathtime column
 summary(df_tidyverse$deathtime)
 
@@ -168,12 +161,10 @@ Thus, explicitly specifying the column data types does not notably change the sp
 
 Let us focus on a bigger file, `labevents.csv.gz`, which is about 130x bigger than `admissions.csv.gz`.
 ```{bash}
-#| eval: false
 ls -l ~/mimic/hosp/labevents.csv.gz
 ```
 Display the first 10 lines of this file.
 ```{bash}
-#| eval: false
 zcat < ~/mimic/hosp/labevents.csv.gz | head -10
 ```
 
@@ -266,7 +257,6 @@ Then use [`arrow::open_dataset`](https://arrow.apache.org/docs/r/reference/open_
 Write a few sentences to explain what is Apache Arrow. Imagine you want to explain it to a layman in an elevator. 
 
 ```{r}
-#| eval: false
 labevents_arrow <- open_dataset("labevents.csv", format = "csv")
 
 system.time({
@@ -293,7 +283,6 @@ Re-write the csv file `labevents.csv` in the binary Parquet format (Hint: [`arro
 Write a few sentences to explain what is the Parquet format. Imagine you want to explain it to a layman in an elevator.
 
 ```{r}
-#| eval: false
 write_dataset(open_dataset("labevents.csv", format = "csv"),
               path = "labevents_parquet", format = "parquet")
 system("du -sh labevents_parquet")
@@ -320,7 +309,6 @@ Ingest the Parquet file, convert it to a DuckDB table by [`arrow::to_duckdb`](ht
 Write a few sentences to explain what is DuckDB. Imagine you want to explain it to a layman in an elevator.
 
 ```{r}
-#| eval: false
 execution_time <- system.time({
   con <- dbConnect(duckdb::duckdb())
 
@@ -348,23 +336,19 @@ DuckDB is an in-memory, column-oriented, analytical database. It's a tiny databa
 
 [`chartevents.csv.gz`](https://mimic.mit.edu/docs/iv/modules/icu/chartevents/) contains all the charted data available for a patient. During their ICU stay, the primary repository of a patient’s information is their electronic chart. The `itemid` variable indicates a single measurement type in the database. The `value` variable is the value measured for `itemid`. The first 10 lines of `chartevents.csv.gz` are
 ```{bash}
-#| eval: false
 zcat < ~/mimic/icu/chartevents.csv.gz | head -10
 ```
 How many rows? 433 millions.
 ```{bash}
-#| eval: false
 zcat < ~/mimic/icu/chartevents.csv.gz | tail -n +2 | wc -l
 ```
 [`d_items.csv.gz`](https://mimic.mit.edu/docs/iv/modules/icu/d_items/) is the dictionary for the `itemid` in `chartevents.csv.gz`.
 ```{bash}
-#| eval: false
 zcat < ~/mimic/icu/d_items.csv.gz | head -10
 ```
 In later exercises, we are interested in the vitals for ICU patients: heart rate (220045), mean non-invasive blood pressure (220181), systolic non-invasive blood pressure (220179), body temperature in Fahrenheit (223761), and respiratory rate (220210). Retrieve a subset of `chartevents.csv.gz` only containing these items, using the favorite method you learnt in Q2. 
 
 ```{bash}
-#| eval: false
 zcat < ~/mimic/icu/chartevents.csv.gz | \
 awk -F',' '{if ($7 == 220045 || $7 == 220181 || $7 == 220179 || $7 == 223761 || 
 $7 == 220210) print $7}' | \
@@ -374,11 +358,9 @@ gzip > ~/203b/hw/hw2/chartevents_filtered.csv
 Document the steps and show code. Display the number of rows and the first 10 rows of the result tibble.
 
 ```{bash}
-#| eval: false
 zcat < chartevents_filtered.csv | wc -l
 ```
 
 ```{bash}
-#| eval: false
 zcat < chartevents_filtered.csv | head -10
 ```
