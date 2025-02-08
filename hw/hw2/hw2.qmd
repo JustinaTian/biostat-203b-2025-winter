@@ -321,22 +321,25 @@ Write a few sentences to explain what is DuckDB. Imagine you want to explain it 
 
 ```{r}
 #| eval: false
-con <- dbConnect(duckdb::duckdb())
-
 execution_time <- system.time({
-  labevents_arrow <- open_dataset("labevents_parquet", format = "parquet") %>% collect() 
-  labevents_duckdb <- copy_to(con, labevents_arrow, "labevents", temporary = TRUE)
+  con <- dbConnect(duckdb::duckdb())
+
+  labevents_arrow <- arrow::open_dataset("labevents_parquet", format = "parquet")
+
+  labevents_duckdb <- arrow::to_duckdb(labevents_arrow, con = con, table_name = "labevents")
+
   filtered_data <- tbl(con, "labevents") %>%
     filter(itemid %in% c(50912, 50971, 50983, 50902, 50882, 51221, 51301, 50931)) %>%
     select(subject_id, itemid, charttime, valuenum) %>%
     collect()
-  })
+
+  dbDisconnect(con, shutdown = TRUE)
+})
 
 print(execution_time)
 cat("Number of rows:", nrow(filtered_data), "\n")
 print(head(filtered_data, 10))
 
-dbDisconnect(con, shutdown = TRUE)
 ```
 
 DuckDB is an in-memory, column-oriented, analytical database. It's a tiny database that resides directly in your program or in your computer, not on any server, and does not require any installation. Think of it as a fast, local, in-memory database that is perfect for quick processing of volumes of data. DuckDB is able to execute SQL queries on datasets an order of magnitude faster than traditional systems and is especially optimized for analytical tasks such as filtering, aggregation, and joining data. It is easy to set up, use, and its strong performance when working with big data directly in memory; that is why it is perfect for data analysis on smaller and medium-sized datasets.
