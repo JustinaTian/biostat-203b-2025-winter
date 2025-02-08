@@ -351,8 +351,8 @@ In later exercises, we are interested in the vitals for ICU patients: heart rate
 
 ```{bash}
 zcat < ~/mimic/icu/chartevents.csv.gz | \
-awk -F',' '{if ($7 == 220045 || $7 == 220181 || $7 == 220179 || $7 == 223761 || 
-$7 == 220210) print $7}' | \
+awk -F',' '{if ($7 == 220045 || $7 == 220181 || $7 == 220179 || \
+$7 == 223761 || $7 == 220210) print $7}' | \
 gzip > ~/203b/hw/hw2/chartevents_filtered.csv
 ```
 
