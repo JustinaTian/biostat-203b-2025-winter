@@ -268,6 +268,8 @@ nrow(labevents_filtered_arrow)
 head(labevents_filtered_arrow, 10)
 ```
 
+Apache Arrow is designed to handle huge datasets that do not fit into memory, a situation very common in fields like data science and machine learning. Arrow provides an extremely optimized columnar memory format for efficiently doing analytics with no repeated reading/writing of data. In addition, it has great applications in distributed computing, for example, big data, where you need to move or process huge datasets in record time.
+
 ### Q2.5 Compress `labevents.csv` to Parquet format and ingest/select/filter
 
 <p align="center">
@@ -292,6 +294,8 @@ system.time({
 nrow(labevents_parquet)
 head(labevents_parquet, 10)
 ```
+
+Parquet is a columnar storage format that is ideal for big data processing. Let's assume you have a huge spreadsheet comprising millions of rows and thousands of columns, and you want to analyze just a couple of the columns-with the above information in mind, the traditional row-based information would require you to bring the data into memory all at once, whereas you actually need a small part. Parquet achieves this through its columnar file format, where you only have to load those columns you are interested in. This makes it much more efficient with respect to both storage and query speed. That finds broad applications for big data analytics, especially when systems like Apache Hadoop or Spark come into the picture.
 
 ### Q2.6 DuckDB
 
@@ -321,6 +325,8 @@ print(head(filtered_data, 10))
 
 dbDisconnect(con, shutdown = TRUE)
 ```
+
+DuckDB is an in-memory, column-oriented, analytical database. It's a tiny database that resides directly in your program or in your computer, not on any server, and does not require any installation. Think of it as a fast, local, in-memory database that is perfect for quick processing of volumes of data. DuckDB is able to execute SQL queries on datasets an order of magnitude faster than traditional systems and is especially optimized for analytical tasks such as filtering, aggregation, and joining data. It is easy to set up, use, and its strong performance when working with big data directly in memory; that is why it is perfect for data analysis on smaller and medium-sized datasets.
 
 ## Q3. Ingest and filter `chartevents.csv.gz`
 
