@@ -6,7 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="Jiaye Tian 306541095">
+<meta name="author" content="Jiaye Tian UID: 306541095">
 
 <title>Biostat 203B Homework 2</title>
 <style>
@@ -3120,7 +3120,7 @@ vertical-align: -.125em;
     <div>
     <div class="quarto-title-meta-heading">Author</div>
     <div class="quarto-title-meta-contents">
-             <p>Jiaye Tian 306541095 </p>
+             <p>Jiaye Tian UID: 306541095 </p>
           </div>
   </div>
     
@@ -3137,9 +3137,9 @@ vertical-align: -.125em;
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>R version 4.4.1 (2024-06-14)
+<pre><code>R version 4.4.2 (2024-10-31)
 Platform: aarch64-apple-darwin20
-Running under: macOS Sonoma 14.0
+Running under: macOS Sonoma 14.7.3
 
 Matrix products: default
 BLAS:   /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/lib/libRblas.0.dylib 
@@ -3148,17 +3148,17 @@ LAPACK: /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/lib/libRlap
 locale:
 [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
 
-time zone: America/New_York
+time zone: America/Los_Angeles
 tzcode source: internal
 
 attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 loaded via a namespace (and not attached):
- [1] htmlwidgets_1.6.4 compiler_4.4.1    fastmap_1.2.0     cli_3.6.3        
- [5] tools_4.4.1       htmltools_0.5.8.1 rstudioapi_0.16.0 yaml_2.3.10      
- [9] rmarkdown_2.28    knitr_1.48        jsonlite_1.8.9    xfun_0.49        
-[13] digest_0.6.37     rlang_1.1.4       evaluate_1.0.1   </code></pre>
+ [1] compiler_4.4.2    fastmap_1.2.0     cli_3.6.3         tools_4.4.2      
+ [5] htmltools_0.5.8.1 rstudioapi_0.17.1 yaml_2.3.10       rmarkdown_2.29   
+ [9] knitr_1.49        jsonlite_1.8.9    xfun_0.50         digest_0.6.37    
+[13] rlang_1.1.5       evaluate_1.0.3   </code></pre>
 </div>
 </div>
 <p>Load necessary libraries (you can add more as needed).</p>
@@ -3249,8 +3249,8 @@ Attaching package: &#39;R.utils&#39;</code></pre>
 ✔ dplyr     1.1.4     ✔ readr     2.1.5
 ✔ forcats   1.0.0     ✔ stringr   1.5.1
 ✔ ggplot2   3.5.1     ✔ tibble    3.2.1
-✔ lubridate 1.9.3     ✔ tidyr     1.3.1
-✔ purrr     1.0.2     </code></pre>
+✔ lubridate 1.9.4     ✔ tidyr     1.3.1
+✔ purrr     1.0.4     </code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
 <pre><code>── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
@@ -3283,44 +3283,104 @@ Attaching package: &#39;R.utils&#39;</code></pre>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>memuse<span class="sc">::</span><span class="fu">Sys.meminfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Totalram:   8.000 GiB 
-Freeram:   57.781 MiB </code></pre>
+<pre><code>Totalram:  16.000 GiB 
+Freeram:   56.422 MiB </code></pre>
 </div>
 </div>
 <p>In this exercise, we explore various tools for ingesting the <a href="https://physionet.org/content/mimiciv/3.1/">MIMIC-IV</a> data introduced in <a href="https://ucla-biostat-203b.github.io/2025winter/hw/hw1/hw1.html">homework 1</a>.</p>
 <p>Display the contents of MIMIC <code>hosp</code> and <code>icu</code> data folders:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-l</span> ~/desktop/203B/</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>total 16
--rw-r--r--@ 1 justinatian  staff  205 Jan 24 10:55 203B.Rproj
--rw-r--r--  1 justinatian  staff   45 Jan 23 20:33 README.md
--rw-r--r--  1 justinatian  staff    0 Jan 23 21:50 git
-drwxr-xr-x  5 justinatian  staff  160 Jan 24 10:52 hw1
-drwxr-xr-x  4 justinatian  staff  128 Jan 24 11:54 hw2</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-l</span> ~/mimic/hosp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-l</span> ~/desktop/203B/</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>total 16
--rw-r--r--@ 1 justinatian  staff  205 Jan 24 10:55 203B.Rproj
--rw-r--r--  1 justinatian  staff   45 Jan 23 20:33 README.md
--rw-r--r--  1 justinatian  staff    0 Jan 23 21:50 git
-drwxr-xr-x  5 justinatian  staff  160 Jan 24 10:52 hw1
-drwxr-xr-x  4 justinatian  staff  128 Jan 24 11:54 hw2</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-l</span> ~/mimic/icu</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <section id="q1.-read.csv-base-r-vs-read_csv-tidyverse-vs-fread-data.table" class="level2">
 <h2 class="anchored" data-anchor-id="q1.-read.csv-base-r-vs-read_csv-tidyverse-vs-fread-data.table">Q1. <code>read.csv</code> (base R) vs <code>read_csv</code> (tidyverse) vs <code>fread</code> (data.table)</h2>
 <section id="q1.1-speed-memory-and-data-types" class="level3">
 <h3 class="anchored" data-anchor-id="q1.1-speed-memory-and-data-types">Q1.1 Speed, memory, and data types</h3>
 <p>There are quite a few utilities in R for reading plain text data files. Let us test the speed of reading a moderate sized compressed csv file, <code>admissions.csv.gz</code>, by three functions: <code>read.csv</code> in base R, <code>read_csv</code> in tidyverse, and <code>fread</code> in the data.table package.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>path <span class="ot">&lt;-</span> <span class="st">&quot;~/mimic/hosp/admissions.csv.gz&quot;</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="co"># `read.csv` (base R) speed, memory, and data types</span></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>baseR <span class="ot">&lt;-</span> <span class="fu">system.time</span>({</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>  df_base <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="fu">gzfile</span>(path))</span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>mem_base <span class="ot">&lt;-</span> pryr<span class="sc">::</span><span class="fu">object_size</span>(df_base)</span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(df_base)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co"># `read_csv` (tidyverse) speed, memory, and data types</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>tidyverse <span class="ot">&lt;-</span> <span class="fu">system.time</span>({</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>  df_tidyverse <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="fu">gzfile</span>(path))</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>mem_tidyverse <span class="ot">&lt;-</span> pryr<span class="sc">::</span><span class="fu">object_size</span>(df_tidyverse)</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(df_tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co"># `fread` (data.table) speed, memory, and data types</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>fread <span class="ot">&lt;-</span> <span class="fu">system.time</span>({</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>  df_fread <span class="ot">&lt;-</span> <span class="fu">fread</span>(path)</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>mem_fread <span class="ot">&lt;-</span> pryr<span class="sc">::</span><span class="fu">object_size</span>(df_fread)</span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(df_fread)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">read_types =</span> <span class="fu">c</span>(<span class="st">&quot;Base R (read.csv)&quot;</span>, <span class="st">&quot;Tidyverse (read_csv)&quot;</span>, <span class="st">&quot;Data.table (fread)&quot;</span>),</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">speed_sec =</span> <span class="fu">c</span>(baseR[<span class="dv">3</span>], tidyverse[<span class="dv">3</span>], fread[<span class="dv">3</span>]),</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">memory_MB =</span> <span class="fu">c</span>(<span class="fu">as.numeric</span>(mem_base)<span class="sc">/</span><span class="fl">1e6</span>,</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>                <span class="fu">as.numeric</span>(mem_tidyverse)<span class="sc">/</span><span class="fl">1e6</span>,</span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>                <span class="fu">as.numeric</span>(mem_fread)<span class="sc">/</span><span class="fl">1e6</span>)</span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(result)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <p>Which function is fastest? Is there difference in the (default) parsed data types? How much memory does each resultant dataframe or tibble use? (Hint: <code>system.time</code> measures run times; <code>pryr::object_size</code> measures memory usage; all these readers can take gz file as input without explicit decompression.)</p>
+<p>The fastest function for reading the file was fread from the data.table package, with a reading time of 0.663 seconds.</p>
+<p>Yes, there are differences in the parsed data types: Base R (read.csv): Converts character columns to factors by default. Tidyverse (read_csv): Keeps character columns as characters. Data.table (fread): Also keeps character columns as characters. So, the main difference is that Base R converts character columns to factors, while both Tidyverse and Data.table preserve them as characters.</p>
+<p>The most memory-efficient function was fread from data.table, which used 63.47 MB of memory. read_csv from tidyverse also performed better than base R in terms of memory usage, consuming 70.02 MB. read.csv from base R was the most memory-intensive, using 200.10 MB of memory.</p>
 </section>
 <section id="q1.2-user-supplied-data-types" class="level3">
 <h3 class="anchored" data-anchor-id="q1.2-user-supplied-data-types">Q1.2 User-supplied data types</h3>
 <p>Re-ingest <code>admissions.csv.gz</code> by indicating appropriate column data types in <code>read_csv</code>. Does the run time change? How much memory does the result tibble use? (Hint: <code>col_types</code> argument in <code>read_csv</code>.)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check summary of the deathtime column</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(df_tidyverse<span class="sc">$</span>deathtime)</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Check number of missing values (NA)</span></span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">is.na</span>(df_tidyverse<span class="sc">$</span>deathtime))</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>col_types_defined <span class="ot">&lt;-</span> <span class="fu">cols</span>(</span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">subject_id =</span> <span class="fu">col_double</span>(),</span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">hadm_id =</span> <span class="fu">col_double</span>(),</span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">admittime =</span> <span class="fu">col_datetime</span>(),</span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">dischtime =</span> <span class="fu">col_datetime</span>(),</span>
+<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">deathtime =</span> <span class="fu">col_datetime</span>(),</span>
+<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">admission_type =</span> <span class="fu">col_character</span>(),</span>
+<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">admit_provider_id =</span> <span class="fu">col_character</span>(),</span>
+<span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">admission_location =</span> <span class="fu">col_character</span>(),</span>
+<span id="cb36-16"><a href="#cb36-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">discharge_location =</span> <span class="fu">col_character</span>(),</span>
+<span id="cb36-17"><a href="#cb36-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">insurance =</span> <span class="fu">col_character</span>(),</span>
+<span id="cb36-18"><a href="#cb36-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">language =</span> <span class="fu">col_character</span>(),</span>
+<span id="cb36-19"><a href="#cb36-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">marital_status =</span> <span class="fu">col_character</span>(),</span>
+<span id="cb36-20"><a href="#cb36-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">race =</span> <span class="fu">col_character</span>(),</span>
+<span id="cb36-21"><a href="#cb36-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">edregtime =</span> <span class="fu">col_datetime</span>(),</span>
+<span id="cb36-22"><a href="#cb36-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">edouttime =</span> <span class="fu">col_datetime</span>(),</span>
+<span id="cb36-23"><a href="#cb36-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">hospital_expire_flag =</span> <span class="fu">col_double</span>()</span>
+<span id="cb36-24"><a href="#cb36-24" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb36-25"><a href="#cb36-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-26"><a href="#cb36-26" aria-hidden="true" tabindex="-1"></a>mem_time_reingest <span class="ot">&lt;-</span> <span class="fu">system.time</span>({</span>
+<span id="cb36-27"><a href="#cb36-27" aria-hidden="true" tabindex="-1"></a>  df_reingest <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">&quot;~/mimic/hosp/admissions.csv.gz&quot;</span>, <span class="at">col_types =</span> col_types_defined)</span>
+<span id="cb36-28"><a href="#cb36-28" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb36-29"><a href="#cb36-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-30"><a href="#cb36-30" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Default read_csv time:&quot;</span>, tidyverse[<span class="dv">3</span>], <span class="st">&quot;seconds</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb36-31"><a href="#cb36-31" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Default read_csv memory:&quot;</span>, <span class="fu">as.numeric</span>(mem_tidyverse)<span class="sc">/</span><span class="fl">1e6</span>, <span class="st">&quot;MB</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>By re-ingesting the admissions.csv.gz file and specifying column data types using the col_types argument in read_csv, the run time does not significantly change compared to the default ingestion method:</p>
+<p>Run Time: The re-ingestion time using the specified column types is 1.021 seconds, which is the same as the default read time.</p>
+<p>Memory Usage: The memory usage after specifying column types is 70.02 MB, which is similar to the default method.</p>
+<p>Thus, explicitly specifying the column data types does not notably change the speed or memory usage in this case. However, defining the data types can help optimize performance when dealing with large datasets.</p>
 </section>
 </section>
 <section id="q2.-ingest-big-data-files" class="level2">
@@ -3330,22 +3390,11 @@ drwxr-xr-x  4 justinatian  staff  128 Jan 24 11:54 hw2</code></pre>
 </p>
 <p>Let us focus on a bigger file, <code>labevents.csv.gz</code>, which is about 130x bigger than <code>admissions.csv.gz</code>.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-l</span> ~/desktop/203B</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>total 16
--rw-r--r--@ 1 justinatian  staff  205 Jan 24 10:55 203B.Rproj
--rw-r--r--  1 justinatian  staff   45 Jan 23 20:33 README.md
--rw-r--r--  1 justinatian  staff    0 Jan 23 21:50 git
-drwxr-xr-x  5 justinatian  staff  160 Jan 24 10:52 hw1
-drwxr-xr-x  4 justinatian  staff  128 Jan 24 11:54 hw2</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-l</span> ~/mimic/hosp/labevents.csv.gz</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Display the first 10 lines of this file.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">zcat</span> <span class="op">&lt;</span> ~/desktop/203B <span class="kw">|</span> <span class="fu">head</span> <span class="at">-10</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>zcat: can&#39;t read stdin: Is a directory</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">zcat</span> <span class="op">&lt;</span> ~/mimic/hosp/labevents.csv.gz <span class="kw">|</span> <span class="fu">head</span> <span class="at">-10</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <section id="q2.1-ingest-labevents.csv.gz-by-read_csv" class="level3">
 <h3 class="anchored" data-anchor-id="q2.1-ingest-labevents.csv.gz-by-read_csv">Q2.1 Ingest <code>labevents.csv.gz</code> by <code>read_csv</code></h3>
@@ -3353,10 +3402,28 @@ drwxr-xr-x  4 justinatian  staff  128 Jan 24 11:54 hw2</code></pre>
 <img role="img" src="./readr_logo.png" width="20%">
 </p>
 <p>Try to ingest <code>labevents.csv.gz</code> using <code>read_csv</code>. What happens? If it takes more than 3 minutes on your computer, then abort the program and report your findings.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>path_labevents <span class="ot">&lt;-</span> <span class="st">&quot;~/mimic/hosp/labevents.csv.gz&quot;</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>labevents_time <span class="ot">&lt;-</span> <span class="fu">system.time</span>({</span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>  df_labevents <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">&quot;~/mimic/hosp/labevents.csv.gz&quot;</span>)</span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>When trying to read labevents.csv.gz using read_csv, I encountered the following issues: Long reading time. After running for about 3 minutes, the reading process still hadn’t completed, forcing me to manually abort the program. The file is very large, and read_csv is not able to efficiently handle such a large dataset, resulting in a performance bottleneck.</p>
+<p>Memory consumption: Due to the file’s substantial size, read_csv requires a significant amount of memory to load the entire dataset, which could exhaust the available memory on the computer.</p>
+<p>Thus, read_csv is suitable for smaller datasets, but for large files like labevents.csv.gz, its performance is inadequate, leading to extremely slow read times or failure to complete the operation.</p>
 </section>
 <section id="q2.2-ingest-selected-columns-of-labevents.csv.gz-by-read_csv" class="level3">
 <h3 class="anchored" data-anchor-id="q2.2-ingest-selected-columns-of-labevents.csv.gz-by-read_csv">Q2.2 Ingest selected columns of <code>labevents.csv.gz</code> by <code>read_csv</code></h3>
 <p>Try to ingest only columns <code>subject_id</code>, <code>itemid</code>, <code>charttime</code>, and <code>valuenum</code> in <code>labevents.csv.gz</code> using <code>read_csv</code>. Does this solve the ingestion issue? (Hint: <code>col_select</code> argument in <code>read_csv</code>.)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>labevents_selected <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>  path_labevents,</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">col_select =</span> <span class="fu">c</span>(subject_id, itemid, charttime, valuenum)</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>By selecting only the necessary columns, I successfully overcame the performance issues related to large files. Using read_csv with the col_select argument significantly improved the speed and made memory consumption more manageable.</p>
+<p>For large datasets like this one, selectively reading the required columns is an effective strategy that reduces the data load, thus enhancing performance and preventing memory overflow.</p>
 </section>
 <section id="q2.3-ingest-a-subset-of-labevents.csv.gz" class="level3">
 <h3 class="anchored" data-anchor-id="q2.3-ingest-a-subset-of-labevents.csv.gz">Q2.3 Ingest a subset of <code>labevents.csv.gz</code></h3>
@@ -3366,6 +3433,19 @@ drwxr-xr-x  4 justinatian  staff  128 Jan 24 11:54 hw2</code></pre>
 <p>Our first strategy to handle this big data file is to make a subset of the <code>labevents</code> data. Read the <a href="https://mimic.mit.edu/docs/iv/modules/hosp/labevents/">MIMIC documentation</a> for the content in data file <code>labevents.csv</code>.</p>
 <p>In later exercises, we will only be interested in the following lab items: creatinine (50912), potassium (50971), sodium (50983), chloride (50902), bicarbonate (50882), hematocrit (51221), white blood cell count (51301), and glucose (50931) and the following columns: <code>subject_id</code>, <code>itemid</code>, <code>charttime</code>, <code>valuenum</code>. Write a Bash command to extract these columns and rows from <code>labevents.csv.gz</code> and save the result to a new file <code>labevents_filtered.csv.gz</code> in the current working directory. (Hint: Use <code>zcat &lt;</code> to pipe the output of <code>labevents.csv.gz</code> to <code>awk</code> and then to <code>gzip</code> to compress the output. Do <strong>not</strong> put <code>labevents_filtered.csv.gz</code> in Git! To save render time, you can put <code>#| eval: false</code> at the beginning of this code chunk. TA will change it to <code>#| eval: true</code> before rendering your qmd file.)</p>
 <p>Display the first 10 lines of the new file <code>labevents_filtered.csv.gz</code>. How many lines are in this new file, excluding the header? How long does it take <code>read_csv</code> to ingest <code>labevents_filtered.csv.gz</code>?</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">zcat</span> ~/mimic/hosp/labevents.csv.gz <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="fu">awk</span> <span class="at">-F</span><span class="st">&#39;,&#39;</span> <span class="st">&#39;{if ($5 == 50912 || $5 == 50971 || $5 == 50983 || $5 == 50902 || $5 == 50882 || $5 == 51221 || $5 == 51301 || $5 == 50931) print $2 &quot;,&quot; $5 &quot;,&quot; $7 &quot;,&quot; $10}&#39;</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a><span class="fu">gzip</span> <span class="op">&gt;</span> ~/203b/hw/hw2/labevents_filtered.csv.gz</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">zcat</span> labevents_filtered.csv.gz <span class="kw">|</span> <span class="fu">head</span> <span class="at">-n</span> 10</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a><span class="fu">zcat</span> labevents_filtered.csv.gz <span class="kw">|</span> <span class="fu">tail</span> <span class="at">-n</span> +2 <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">system.time</span>(<span class="fu">read_csv</span>(<span class="st">&quot;labevents_filtered.csv.gz&quot;</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 </section>
 <section id="q2.4-ingest-labevents.csv-by-apache-arrow" class="level3">
 <h3 class="anchored" data-anchor-id="q2.4-ingest-labevents.csv-by-apache-arrow">Q2.4 Ingest <code>labevents.csv</code> by Apache Arrow</h3>
@@ -3373,8 +3453,25 @@ drwxr-xr-x  4 justinatian  staff  128 Jan 24 11:54 hw2</code></pre>
 <img role="img" src="./arrow_logo.png" width="30%">
 </p>
 <p>Our second strategy is to use <a href="https://arrow.apache.org/">Apache Arrow</a> for larger-than-memory data analytics. Unfortunately Arrow does not work with gz files directly. First decompress <code>labevents.csv.gz</code> to <code>labevents.csv</code> and put it in the current working directory (do not add it in git!). To save render time, put <code>#| eval: false</code> at the beginning of this code chunk. TA will change it to <code>#| eval: true</code> when rendering your qmd file.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">gunzip</span> <span class="at">-c</span> ~/mimic/hosp/labevents.csv.gz <span class="op">&gt;</span> ~/203b/hw/hw2/labevents.csv</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <p>Then use <a href="https://arrow.apache.org/docs/r/reference/open_dataset.html"><code>arrow::open_dataset</code></a> to ingest <code>labevents.csv</code>, select columns, and filter <code>itemid</code> as in Q2.3. How long does the ingest+select+filter process take? Display the number of rows and the first 10 rows of the result tibble, and make sure they match those in Q2.3. (Hint: use <code>dplyr</code> verbs for selecting columns and filtering rows.)</p>
 <p>Write a few sentences to explain what is Apache Arrow. Imagine you want to explain it to a layman in an elevator.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>labevents_arrow <span class="ot">&lt;-</span> <span class="fu">open_dataset</span>(<span class="st">&quot;labevents.csv&quot;</span>, <span class="at">format =</span> <span class="st">&quot;csv&quot;</span>)</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a><span class="fu">system.time</span>({</span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>  labevents_filtered_arrow <span class="ot">&lt;-</span> labevents_arrow <span class="sc">%&gt;%</span></span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(itemid <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">50912</span>, <span class="dv">50971</span>, <span class="dv">50983</span>, <span class="dv">50902</span>, <span class="dv">50882</span>, <span class="dv">51221</span>, <span class="dv">51301</span>, <span class="dv">50931</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(subject_id, itemid, charttime, valuenum) <span class="sc">%&gt;%</span></span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">collect</span>()</span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-10"><a href="#cb45-10" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(labevents_filtered_arrow)</span>
+<span id="cb45-11"><a href="#cb45-11" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(labevents_filtered_arrow, <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Apache Arrow is designed to handle huge datasets that do not fit into memory, a situation very common in fields like data science and machine learning. Arrow provides an extremely optimized columnar memory format for efficiently doing analytics with no repeated reading/writing of data. In addition, it has great applications in distributed computing, for example, big data, where you need to move or process huge datasets in record time.</p>
 </section>
 <section id="q2.5-compress-labevents.csv-to-parquet-format-and-ingestselectfilter" class="level3">
 <h3 class="anchored" data-anchor-id="q2.5-compress-labevents.csv-to-parquet-format-and-ingestselectfilter">Q2.5 Compress <code>labevents.csv</code> to Parquet format and ingest/select/filter</h3>
@@ -3383,6 +3480,20 @@ drwxr-xr-x  4 justinatian  staff  128 Jan 24 11:54 hw2</code></pre>
 </p>
 <p>Re-write the csv file <code>labevents.csv</code> in the binary Parquet format (Hint: <a href="https://arrow.apache.org/docs/r/reference/write_dataset.html"><code>arrow::write_dataset</code></a>.) How large is the Parquet file(s)? How long does the ingest+select+filter process of the Parquet file(s) take? Display the number of rows and the first 10 rows of the result tibble and make sure they match those in Q2.3. (Hint: use <code>dplyr</code> verbs for selecting columns and filtering rows.)</p>
 <p>Write a few sentences to explain what is the Parquet format. Imagine you want to explain it to a layman in an elevator.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">write_dataset</span>(<span class="fu">open_dataset</span>(<span class="st">&quot;labevents.csv&quot;</span>, <span class="at">format =</span> <span class="st">&quot;csv&quot;</span>),</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>              <span class="at">path =</span> <span class="st">&quot;labevents_parquet&quot;</span>, <span class="at">format =</span> <span class="st">&quot;parquet&quot;</span>)</span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a><span class="fu">system</span>(<span class="st">&quot;du -sh labevents_parquet&quot;</span>)</span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a><span class="fu">system.time</span>({</span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>  labevents_parquet <span class="ot">&lt;-</span> <span class="fu">open_dataset</span>(<span class="st">&quot;labevents_parquet&quot;</span>, <span class="at">format =</span> <span class="st">&quot;parquet&quot;</span>) <span class="sc">%&gt;%</span> <span class="fu">filter</span>(itemid <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">50912</span>, <span class="dv">50971</span>, <span class="dv">50983</span>, <span class="dv">50902</span>, <span class="dv">50882</span>, <span class="dv">51221</span>, <span class="dv">51301</span>, <span class="dv">50931</span>)) <span class="sc">%&gt;%</span> <span class="fu">select</span>(subject_id, itemid, charttime, valuenum) <span class="sc">%&gt;%</span></span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">collect</span>()</span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(labevents_parquet)</span>
+<span id="cb46-11"><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(labevents_parquet, <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Parquet is a columnar storage format that is ideal for big data processing. Let’s assume you have a huge spreadsheet comprising millions of rows and thousands of columns, and you want to analyze just a couple of the columns-with the above information in mind, the traditional row-based information would require you to bring the data into memory all at once, whereas you actually need a small part. Parquet achieves this through its columnar file format, where you only have to load those columns you are interested in. This makes it much more efficient with respect to both storage and query speed. That finds broad applications for big data analytics, especially when systems like Apache Hadoop or Spark come into the picture.</p>
 </section>
 <section id="q2.6-duckdb" class="level3">
 <h3 class="anchored" data-anchor-id="q2.6-duckdb">Q2.6 DuckDB</h3>
@@ -3391,30 +3502,55 @@ drwxr-xr-x  4 justinatian  staff  128 Jan 24 11:54 hw2</code></pre>
 </p>
 <p>Ingest the Parquet file, convert it to a DuckDB table by <a href="https://arrow.apache.org/docs/r/reference/to_duckdb.html"><code>arrow::to_duckdb</code></a>, select columns, and filter rows as in Q2.5. How long does the ingest+convert+select+filter process take? Display the number of rows and the first 10 rows of the result tibble and make sure they match those in Q2.3. (Hint: use <code>dplyr</code> verbs for selecting columns and filtering rows.)</p>
 <p>Write a few sentences to explain what is DuckDB. Imagine you want to explain it to a layman in an elevator.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>con <span class="ot">&lt;-</span> <span class="fu">dbConnect</span>(duckdb<span class="sc">::</span><span class="fu">duckdb</span>())</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>execution_time <span class="ot">&lt;-</span> <span class="fu">system.time</span>({</span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>  labevents_arrow <span class="ot">&lt;-</span> <span class="fu">open_dataset</span>(<span class="st">&quot;labevents_parquet&quot;</span>, <span class="at">format =</span> <span class="st">&quot;parquet&quot;</span>) <span class="sc">%&gt;%</span> <span class="fu">collect</span>() </span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>  labevents_duckdb <span class="ot">&lt;-</span> <span class="fu">copy_to</span>(con, labevents_arrow, <span class="st">&quot;labevents&quot;</span>, <span class="at">temporary =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>  filtered_data <span class="ot">&lt;-</span> <span class="fu">tbl</span>(con, <span class="st">&quot;labevents&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(itemid <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">50912</span>, <span class="dv">50971</span>, <span class="dv">50983</span>, <span class="dv">50902</span>, <span class="dv">50882</span>, <span class="dv">51221</span>, <span class="dv">51301</span>, <span class="dv">50931</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(subject_id, itemid, charttime, valuenum) <span class="sc">%&gt;%</span></span>
+<span id="cb47-9"><a href="#cb47-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">collect</span>()</span>
+<span id="cb47-10"><a href="#cb47-10" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb47-11"><a href="#cb47-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-12"><a href="#cb47-12" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(execution_time)</span>
+<span id="cb47-13"><a href="#cb47-13" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Number of rows:&quot;</span>, <span class="fu">nrow</span>(filtered_data), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb47-14"><a href="#cb47-14" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">head</span>(filtered_data, <span class="dv">10</span>))</span>
+<span id="cb47-15"><a href="#cb47-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-16"><a href="#cb47-16" aria-hidden="true" tabindex="-1"></a><span class="fu">dbDisconnect</span>(con, <span class="at">shutdown =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>DuckDB is an in-memory, column-oriented, analytical database. It’s a tiny database that resides directly in your program or in your computer, not on any server, and does not require any installation. Think of it as a fast, local, in-memory database that is perfect for quick processing of volumes of data. DuckDB is able to execute SQL queries on datasets an order of magnitude faster than traditional systems and is especially optimized for analytical tasks such as filtering, aggregation, and joining data. It is easy to set up, use, and its strong performance when working with big data directly in memory; that is why it is perfect for data analysis on smaller and medium-sized datasets.</p>
 </section>
 </section>
 <section id="q3.-ingest-and-filter-chartevents.csv.gz" class="level2">
 <h2 class="anchored" data-anchor-id="q3.-ingest-and-filter-chartevents.csv.gz">Q3. Ingest and filter <code>chartevents.csv.gz</code></h2>
 <p><a href="https://mimic.mit.edu/docs/iv/modules/icu/chartevents/"><code>chartevents.csv.gz</code></a> contains all the charted data available for a patient. During their ICU stay, the primary repository of a patient’s information is their electronic chart. The <code>itemid</code> variable indicates a single measurement type in the database. The <code>value</code> variable is the value measured for <code>itemid</code>. The first 10 lines of <code>chartevents.csv.gz</code> are</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">zcat</span> <span class="op">&lt;</span> ~/mimic/icu/chartevents.csv.gz <span class="kw">|</span> <span class="fu">head</span> <span class="at">-10</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>bash: /Users/justinatian/mimic/icu/chartevents.csv.gz: No such file or directory</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">zcat</span> <span class="op">&lt;</span> ~/mimic/icu/chartevents.csv.gz <span class="kw">|</span> <span class="fu">head</span> <span class="at">-10</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>How many rows? 433 millions.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">zcat</span> <span class="op">&lt;</span> ~/mimic/icu/chartevents.csv.gz <span class="kw">|</span> <span class="fu">tail</span> <span class="at">-n</span> +2 <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">zcat</span> <span class="op">&lt;</span> ~/mimic/icu/chartevents.csv.gz <span class="kw">|</span> <span class="fu">tail</span> <span class="at">-n</span> +2 <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p><a href="https://mimic.mit.edu/docs/iv/modules/icu/d_items/"><code>d_items.csv.gz</code></a> is the dictionary for the <code>itemid</code> in <code>chartevents.csv.gz</code>.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">zcat</span> <span class="op">&lt;</span> ~/mimic/icu/d_items.csv.gz <span class="kw">|</span> <span class="fu">head</span> <span class="at">-10</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>bash: /Users/justinatian/mimic/icu/d_items.csv.gz: No such file or directory</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">zcat</span> <span class="op">&lt;</span> ~/mimic/icu/d_items.csv.gz <span class="kw">|</span> <span class="fu">head</span> <span class="at">-10</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>In later exercises, we are interested in the vitals for ICU patients: heart rate (220045), mean non-invasive blood pressure (220181), systolic non-invasive blood pressure (220179), body temperature in Fahrenheit (223761), and respiratory rate (220210). Retrieve a subset of <code>chartevents.csv.gz</code> only containing these items, using the favorite method you learnt in Q2.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">zcat</span> <span class="op">&lt;</span> ~/mimic/icu/chartevents.csv.gz <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a><span class="fu">awk</span> <span class="at">-F</span><span class="st">&#39;,&#39;</span> <span class="st">&#39;{if ($7 == 220045 || $7 == 220181 || $7 == 220179 || $7 == 223761 || </span></span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a><span class="st">$7 == 220210) print $7}&#39;</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a><span class="fu">gzip</span> <span class="op">&gt;</span> ~/203b/hw/hw2/chartevents_filtered.csv</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <p>Document the steps and show code. Display the number of rows and the first 10 rows of the result tibble.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="fu">zcat</span> <span class="op">&lt;</span> chartevents_filtered.csv <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="fu">zcat</span> <span class="op">&lt;</span> chartevents_filtered.csv <span class="kw">|</span> <span class="fu">head</span> <span class="at">-10</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 </section>
 
 </main>
