@@ -91,7 +91,7 @@ result <- data.frame(
                 as.numeric(mem_tidyverse)/1e6,
                 as.numeric(mem_fread)/1e6)
 )
-print(result)
+print(result, width = Inf)
 ```
 
 
@@ -198,6 +198,8 @@ labevents_selected <- read_csv(
   path_labevents,
   col_select = c(subject_id, itemid, charttime, valuenum)
 )
+
+print(labevents_selected, width = Inf)
 ```
 
 By selecting only the necessary columns, I successfully overcame the performance issues related to large files. Using read_csv with the col_select argument significantly improved the speed and made memory consumption more manageable.
