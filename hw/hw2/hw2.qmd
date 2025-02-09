@@ -91,7 +91,8 @@ result <- data.frame(
                 as.numeric(mem_tidyverse)/1e6,
                 as.numeric(mem_fread)/1e6)
 )
-print(result, width = Inf)
+options(width = 200)  
+print(result, row.names = FALSE)
 ```
 
 
