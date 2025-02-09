@@ -13,6 +13,9 @@ format:
     code-fold: false
 ---
 
+#clear workspace, only keep 'icu_cohort' tibble:
+rm(list = setdiff(ls(), "icu_cohort"))
+
 Display machine information for reproducibility:
 ```{r}
 sessionInfo()
