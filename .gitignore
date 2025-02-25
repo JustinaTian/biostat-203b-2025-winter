@@ -47,5 +47,16 @@ po/*~
 
 # RStudio Connect folder
 rsconnect/
+<<<<<<< HEAD
 pg42671.txt
 pg42671.txt
+=======
+
+.DS_Store
+hw1/middle.sh
+hw1/test1.txt
+hw1/test2.txt
+hw/hw2/labevents.csv
+hw/hw2/labevents_filtered.csv.gz
+hw/hw2/labevents_parquet/
+>>>>>>> main
