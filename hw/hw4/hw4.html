@@ -3164,7 +3164,7 @@ loaded via a namespace (and not attached):
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>memuse<span class="sc">::</span><span class="fu">Sys.meminfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Totalram:  16.000 GiB 
-Freeram:   70.719 MiB </code></pre>
+Freeram:   41.531 MiB </code></pre>
 </div>
 </div>
 <p>Load database libraries and the tidyverse frontend:</p>
@@ -3746,12 +3746,15 @@ ORDER BY is ignored in subqueries without LIMIT
 <span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(admissions_tble, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&quot;subject_id&quot;</span>, <span class="st">&quot;hadm_id&quot;</span>)) <span class="sc">%&gt;%</span></span>
 <span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(patients_tble, <span class="at">by =</span> <span class="st">&quot;subject_id&quot;</span>) <span class="sc">%&gt;%</span></span>
 <span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>  <span class="co"># keep adults only (age &gt;= 18), using MIMIC-IV&#39;s anchor_age</span></span>
-<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(anchor_age <span class="sc">&gt;=</span> <span class="dv">18</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(labevents_tble, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&quot;subject_id&quot;</span>, <span class="st">&quot;stay_id&quot;</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(chartevents_tble, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&quot;subject_id&quot;</span>, <span class="st">&quot;stay_id&quot;</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">collect</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(subject_id, hadm_id, stay_id) <span class="sc">%&gt;%</span></span>
-<span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="at">width =</span> <span class="cn">Inf</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">ageintime =</span> anchor_age <span class="sc">+</span> (<span class="fu">year</span>(intime) <span class="sc">-</span> anchor_year))<span class="sc">%&gt;%</span></span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(ageintime <span class="sc">&gt;=</span> <span class="dv">18</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(labevents_tble, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&quot;subject_id&quot;</span>, <span class="st">&quot;stay_id&quot;</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(chartevents_tble, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&quot;subject_id&quot;</span>, <span class="st">&quot;stay_id&quot;</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>intime_x) <span class="sc">%&gt;%</span></span>
+<span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">intime =</span> intime_y) <span class="sc">%&gt;%</span></span>
+<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">collect</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb38-13"><a href="#cb38-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(subject_id, hadm_id, stay_id) <span class="sc">%&gt;%</span></span>
+<span id="cb38-14"><a href="#cb38-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(mimic_icu_cohort, <span class="at">width =</span> <span class="cn">Inf</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: ORDER BY is ignored in subqueries without LIMIT
 ℹ Do you need to move arrange() later in the pipeline or use window_order() instead?
@@ -3768,6 +3771,14 @@ ORDER BY is ignored in subqueries without LIMIT
 ORDER BY is ignored in subqueries without LIMIT
 ℹ Do you need to move arrange() later in the pipeline or use window_order() instead?</code></pre>
 </div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: `...` must be empty in `format.tbl()`
+Caused by error in `format_tbl()`:
+! `...` must be empty.
+✖ Problematic argument:
+• ..1 = mimic_icu_cohort
+ℹ Did you forget to name an argument?</code></pre>
+</div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 94,458 × 41
    subject_id  hadm_id  stay_id first_careunit                                  
@@ -3782,114 +3793,102 @@ ORDER BY is ignored in subqueries without LIMIT
  8   10001884 26184834 37510196 Medical Intensive Care Unit (MICU)              
  9   10002013 23581541 39060235 Cardiac Vascular Intensive Care Unit (CVICU)    
 10   10002114 27793700 34672098 Coronary Care Unit (CCU)                        
-   last_careunit                                    intime_x           
-   &lt;chr&gt;                                            &lt;dttm&gt;             
- 1 Medical Intensive Care Unit (MICU)               2180-07-23 14:00:00
- 2 Medical Intensive Care Unit (MICU)               2150-11-02 19:37:00
- 3 Medical Intensive Care Unit (MICU)               2189-06-27 08:42:00
- 4 Surgical Intensive Care Unit (SICU)              2157-11-20 19:18:02
- 5 Surgical Intensive Care Unit (SICU)              2157-12-19 15:42:24
- 6 Medical/Surgical Intensive Care Unit (MICU/SICU) 2110-04-11 15:52:22
- 7 Medical/Surgical Intensive Care Unit (MICU/SICU) 2134-12-05 18:50:03
- 8 Medical Intensive Care Unit (MICU)               2131-01-11 04:20:05
- 9 Cardiac Vascular Intensive Care Unit (CVICU)     2160-05-18 10:00:53
-10 Coronary Care Unit (CCU)                         2162-02-17 23:30:00
-   outtime               los admittime           dischtime          
-   &lt;dttm&gt;              &lt;dbl&gt; &lt;dttm&gt;              &lt;dttm&gt;             
- 1 2180-07-23 23:50:47 0.410 2180-07-23 12:35:00 2180-07-25 17:55:00
- 2 2150-11-06 17:03:17 3.89  2150-11-02 18:02:00 2150-11-12 13:45:00
- 3 2189-06-27 20:38:27 0.498 2189-06-27 07:38:00 2189-07-03 03:00:00
- 4 2157-11-21 22:08:00 1.12  2157-11-18 22:56:00 2157-11-25 18:00:00
- 5 2157-12-20 14:27:41 0.948 2157-12-18 16:58:00 2157-12-24 14:55:00
- 6 2110-04-12 23:59:56 1.34  2110-04-11 15:08:00 2110-04-14 15:00:00
- 7 2134-12-06 14:38:26 0.825 2134-12-05 00:10:00 2134-12-06 12:54:00
- 8 2131-01-20 08:27:30 9.17  2131-01-07 20:39:00 2131-01-20 05:15:00
- 9 2160-05-19 17:33:33 1.31  2160-05-18 07:45:00 2160-05-23 13:30:00
-10 2162-02-20 21:16:27 2.91  2162-02-17 22:32:00 2162-03-04 15:16:00
-   deathtime           admission_type              admit_provider_id
-   &lt;dttm&gt;              &lt;chr&gt;                       &lt;chr&gt;            
- 1 NA                  EW EMER.                    P06OTX           
- 2 NA                  EW EMER.                    P26QQ4           
- 3 NA                  EW EMER.                    P06OTX           
- 4 NA                  EW EMER.                    P3610N           
- 5 NA                  DIRECT EMER.                P276OU           
- 6 NA                  EW EMER.                    P32W56           
- 7 2134-12-06 12:54:00 URGENT                      P67ATB           
- 8 2131-01-20 05:15:00 OBSERVATION ADMIT           P49AFC           
- 9 NA                  SURGICAL SAME DAY ADMISSION P8286C           
-10 NA                  OBSERVATION ADMIT           P46834           
-   admission_location     discharge_location insurance language marital_status
-   &lt;chr&gt;                  &lt;chr&gt;              &lt;chr&gt;     &lt;chr&gt;    &lt;chr&gt;         
- 1 EMERGENCY ROOM         HOME               Medicaid  English  WIDOWED       
- 2 EMERGENCY ROOM         REHAB              Medicare  English  WIDOWED       
- 3 EMERGENCY ROOM         HOME HEALTH CARE   Medicare  English  MARRIED       
- 4 EMERGENCY ROOM         HOME HEALTH CARE   Private   Other    MARRIED       
- 5 PHYSICIAN REFERRAL     HOME HEALTH CARE   Private   Other    MARRIED       
- 6 PACU                   HOME               Private   English  MARRIED       
- 7 TRANSFER FROM HOSPITAL DIED               Medicare  English  SINGLE        
- 8 EMERGENCY ROOM         DIED               Medicare  English  MARRIED       
- 9 PHYSICIAN REFERRAL     HOME HEALTH CARE   Medicare  English  SINGLE        
-10 PHYSICIAN REFERRAL     HOME HEALTH CARE   Medicaid  English  &lt;NA&gt;          
-   race                   edregtime           edouttime          
-   &lt;chr&gt;                  &lt;dttm&gt;              &lt;dttm&gt;             
- 1 WHITE                  2180-07-23 05:54:00 2180-07-23 14:00:00
- 2 WHITE                  2150-11-02 11:41:00 2150-11-02 19:37:00
- 3 BLACK/AFRICAN AMERICAN 2189-06-27 06:25:00 2189-06-27 08:42:00
- 4 WHITE                  2157-11-18 17:38:00 2157-11-19 01:24:00
- 5 WHITE                  NA                  NA                 
- 6 WHITE                  NA                  NA                 
- 7 WHITE                  NA                  NA                 
- 8 BLACK/AFRICAN AMERICAN 2131-01-07 13:36:00 2131-01-07 22:13:00
- 9 OTHER                  NA                  NA                 
-10 UNKNOWN                2162-02-17 19:35:00 2162-02-17 23:30:00
-   hospital_expire_flag gender anchor_age anchor_year anchor_year_group
-                  &lt;int&gt; &lt;chr&gt;       &lt;int&gt;       &lt;int&gt; &lt;chr&gt;            
- 1                    0 F              52        2180 2014 - 2016      
- 2                    0 F              86        2150 2008 - 2010      
- 3                    0 F              73        2186 2008 - 2010      
- 4                    0 F              55        2157 2011 - 2013      
- 5                    0 F              55        2157 2011 - 2013      
- 6                    0 F              46        2110 2011 - 2013      
- 7                    1 M              73        2131 2017 - 2019      
- 8                    1 F              68        2122 2008 - 2010      
- 9                    0 F              53        2156 2008 - 2010      
-10                    0 M              56        2162 2020 - 2022      
-   dod        bicarbonate chloride creatinine glucose hematocrit
-   &lt;date&gt;           &lt;dbl&gt;    &lt;dbl&gt;      &lt;dbl&gt;   &lt;dbl&gt;      &lt;dbl&gt;
- 1 2180-09-09          25       95        0.7     102       41.1
- 2 2152-01-30          26      100        1        85       36.1
- 3 2193-08-26          21      109        2.3      89       27.3
- 4 NA                  22      108        0.6     112       38.1
- 5 NA                  30      104        0.5      87       37.4
- 6 NA                  NA       98       NA        NA       NA  
- 7 2134-12-06          28       97        1.3     131       31.4
- 8 2131-01-20          30       88        1.1     141       39.7
- 9 NA                  24      102        0.9     288       34.9
-10 2162-12-11          18       NA        3.1      95       34.3
-   intime_y            potassium sodium   wbc `heart rate`
-   &lt;dttm&gt;                  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;        &lt;dbl&gt;
- 1 2180-07-23 14:00:00       6.7    126   6.9         91  
- 2 2150-11-02 19:37:00       4.8    137   7.1         78  
- 3 2189-06-27 08:42:00       3.9    144   5.3         76  
- 4 2157-11-20 19:18:02       4.2    142  15.7         86  
- 5 2157-12-19 15:42:24       4.1    142   5.4         79.3
- 6 2110-04-11 15:52:22       4.1    139  NA           86  
- 7 2134-12-05 18:50:03       3.9    138  10.4        124. 
- 8 2131-01-11 04:20:05       4.5    130  12.2         49  
- 9 2160-05-18 10:00:53       3.5    137   7.2         80  
-10 2162-02-17 23:30:00       6.5    125  16.8        110. 
-   `non invasive blood pressure systolic`
-                                    &lt;dbl&gt;
- 1                                   84  
- 2                                  106  
- 3                                  154  
- 4                                  151  
- 5                                  156  
- 6                                   73  
- 7                                  110  
- 8                                  174. 
- 9                                   98.5
-10                                  112  
+   last_careunit                                    outtime               los
+   &lt;chr&gt;                                            &lt;dttm&gt;              &lt;dbl&gt;
+ 1 Medical Intensive Care Unit (MICU)               2180-07-23 23:50:47 0.410
+ 2 Medical Intensive Care Unit (MICU)               2150-11-06 17:03:17 3.89 
+ 3 Medical Intensive Care Unit (MICU)               2189-06-27 20:38:27 0.498
+ 4 Surgical Intensive Care Unit (SICU)              2157-11-21 22:08:00 1.12 
+ 5 Surgical Intensive Care Unit (SICU)              2157-12-20 14:27:41 0.948
+ 6 Medical/Surgical Intensive Care Unit (MICU/SICU) 2110-04-12 23:59:56 1.34 
+ 7 Medical/Surgical Intensive Care Unit (MICU/SICU) 2134-12-06 14:38:26 0.825
+ 8 Medical Intensive Care Unit (MICU)               2131-01-20 08:27:30 9.17 
+ 9 Cardiac Vascular Intensive Care Unit (CVICU)     2160-05-19 17:33:33 1.31 
+10 Coronary Care Unit (CCU)                         2162-02-20 21:16:27 2.91 
+   admittime           dischtime           deathtime          
+   &lt;dttm&gt;              &lt;dttm&gt;              &lt;dttm&gt;             
+ 1 2180-07-23 12:35:00 2180-07-25 17:55:00 NA                 
+ 2 2150-11-02 18:02:00 2150-11-12 13:45:00 NA                 
+ 3 2189-06-27 07:38:00 2189-07-03 03:00:00 NA                 
+ 4 2157-11-18 22:56:00 2157-11-25 18:00:00 NA                 
+ 5 2157-12-18 16:58:00 2157-12-24 14:55:00 NA                 
+ 6 2110-04-11 15:08:00 2110-04-14 15:00:00 NA                 
+ 7 2134-12-05 00:10:00 2134-12-06 12:54:00 2134-12-06 12:54:00
+ 8 2131-01-07 20:39:00 2131-01-20 05:15:00 2131-01-20 05:15:00
+ 9 2160-05-18 07:45:00 2160-05-23 13:30:00 NA                 
+10 2162-02-17 22:32:00 2162-03-04 15:16:00 NA                 
+   admission_type              admit_provider_id admission_location    
+   &lt;chr&gt;                       &lt;chr&gt;             &lt;chr&gt;                 
+ 1 EW EMER.                    P06OTX            EMERGENCY ROOM        
+ 2 EW EMER.                    P26QQ4            EMERGENCY ROOM        
+ 3 EW EMER.                    P06OTX            EMERGENCY ROOM        
+ 4 EW EMER.                    P3610N            EMERGENCY ROOM        
+ 5 DIRECT EMER.                P276OU            PHYSICIAN REFERRAL    
+ 6 EW EMER.                    P32W56            PACU                  
+ 7 URGENT                      P67ATB            TRANSFER FROM HOSPITAL
+ 8 OBSERVATION ADMIT           P49AFC            EMERGENCY ROOM        
+ 9 SURGICAL SAME DAY ADMISSION P8286C            PHYSICIAN REFERRAL    
+10 OBSERVATION ADMIT           P46834            PHYSICIAN REFERRAL    
+   discharge_location insurance language marital_status race                  
+   &lt;chr&gt;              &lt;chr&gt;     &lt;chr&gt;    &lt;chr&gt;          &lt;chr&gt;                 
+ 1 HOME               Medicaid  English  WIDOWED        WHITE                 
+ 2 REHAB              Medicare  English  WIDOWED        WHITE                 
+ 3 HOME HEALTH CARE   Medicare  English  MARRIED        BLACK/AFRICAN AMERICAN
+ 4 HOME HEALTH CARE   Private   Other    MARRIED        WHITE                 
+ 5 HOME HEALTH CARE   Private   Other    MARRIED        WHITE                 
+ 6 HOME               Private   English  MARRIED        WHITE                 
+ 7 DIED               Medicare  English  SINGLE         WHITE                 
+ 8 DIED               Medicare  English  MARRIED        BLACK/AFRICAN AMERICAN
+ 9 HOME HEALTH CARE   Medicare  English  SINGLE         OTHER                 
+10 HOME HEALTH CARE   Medicaid  English  &lt;NA&gt;           UNKNOWN               
+   edregtime           edouttime           hospital_expire_flag gender
+   &lt;dttm&gt;              &lt;dttm&gt;                             &lt;int&gt; &lt;chr&gt; 
+ 1 2180-07-23 05:54:00 2180-07-23 14:00:00                    0 F     
+ 2 2150-11-02 11:41:00 2150-11-02 19:37:00                    0 F     
+ 3 2189-06-27 06:25:00 2189-06-27 08:42:00                    0 F     
+ 4 2157-11-18 17:38:00 2157-11-19 01:24:00                    0 F     
+ 5 NA                  NA                                     0 F     
+ 6 NA                  NA                                     0 F     
+ 7 NA                  NA                                     1 M     
+ 8 2131-01-07 13:36:00 2131-01-07 22:13:00                    1 F     
+ 9 NA                  NA                                     0 F     
+10 2162-02-17 19:35:00 2162-02-17 23:30:00                    0 M     
+   anchor_age anchor_year anchor_year_group dod        ageintime bicarbonate
+        &lt;int&gt;       &lt;int&gt; &lt;chr&gt;             &lt;date&gt;         &lt;int&gt;       &lt;dbl&gt;
+ 1         52        2180 2014 - 2016       2180-09-09        52          25
+ 2         86        2150 2008 - 2010       2152-01-30        86          26
+ 3         73        2186 2008 - 2010       2193-08-26        76          21
+ 4         55        2157 2011 - 2013       NA                55          22
+ 5         55        2157 2011 - 2013       NA                55          30
+ 6         46        2110 2011 - 2013       NA                46          NA
+ 7         73        2131 2017 - 2019       2134-12-06        76          28
+ 8         68        2122 2008 - 2010       2131-01-20        77          30
+ 9         53        2156 2008 - 2010       NA                57          24
+10         56        2162 2020 - 2022       2162-12-11        56          18
+   chloride creatinine glucose hematocrit intime              potassium sodium
+      &lt;dbl&gt;      &lt;dbl&gt;   &lt;dbl&gt;      &lt;dbl&gt; &lt;dttm&gt;                  &lt;dbl&gt;  &lt;dbl&gt;
+ 1       95        0.7     102       41.1 2180-07-23 14:00:00       6.7    126
+ 2      100        1        85       36.1 2150-11-02 19:37:00       4.8    137
+ 3      109        2.3      89       27.3 2189-06-27 08:42:00       3.9    144
+ 4      108        0.6     112       38.1 2157-11-20 19:18:02       4.2    142
+ 5      104        0.5      87       37.4 2157-12-19 15:42:24       4.1    142
+ 6       98       NA        NA       NA   2110-04-11 15:52:22       4.1    139
+ 7       97        1.3     131       31.4 2134-12-05 18:50:03       3.9    138
+ 8       88        1.1     141       39.7 2131-01-11 04:20:05       4.5    130
+ 9      102        0.9     288       34.9 2160-05-18 10:00:53       3.5    137
+10       NA        3.1      95       34.3 2162-02-17 23:30:00       6.5    125
+     wbc `heart rate` `non invasive blood pressure systolic`
+   &lt;dbl&gt;        &lt;dbl&gt;                                  &lt;dbl&gt;
+ 1   6.9         91                                     84  
+ 2   7.1         78                                    106  
+ 3   5.3         76                                    154  
+ 4  15.7         86                                    151  
+ 5   5.4         79.3                                  156  
+ 6  NA           86                                     73  
+ 7  10.4        124.                                   110  
+ 8  12.2         49                                    174. 
+ 9   7.2         80                                     98.5
+10  16.8        110.                                   112  
    `non invasive blood pressure diastolic` `respiratory rate`
                                      &lt;dbl&gt;              &lt;dbl&gt;
  1                                    48                 98.7
@@ -3925,97 +3924,97 @@ ORDER BY is ignored in subqueries without LIMIT
 <iframe role="img" width="95%" height="500" src="data:text/html,%3C%21DOCTYPE%20html%3E%0A%3Chtml%20lang%3D%22en%22%3E%0A%3Chead%3E%0A%3Cmeta%20charset%3D%22utf%2D8%22%2F%3E%0A%3Cstyle%3Ebody%7Bbackground%2Dcolor%3Awhite%3B%7D%3C%2Fstyle%3E%0A%0A%0A%3C%2Fhead%3E%0A%3Cbody%3E%0A%3Cdiv%20id%3D%22xpbntktnos%22%20style%3D%22padding%2Dleft%3A0px%3Bpadding%2Dright%3A0px%3Bpadding%2Dtop%3A10px%3Bpadding%2Dbottom%3A10px%3Boverflow%2Dx%3Aauto%3Boverflow%2Dy%3Aauto%3Bwidth%3Aauto%3Bheight%3Aauto%3B%22%3E%0A%20%20%3Cstyle%3E%23xpbntktnos%20table%20%7B%0A%20%20font%2Dfamily%3A%20system%2Dui%2C%20%27Segoe%20UI%27%2C%20Roboto%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%2C%20%27Apple%20Color%20Emoji%27%2C%20%27Segoe%20UI%20Emoji%27%2C%20%27Segoe%20UI%20Symbol%27%2C%20%27Noto%20Color%20Emoji%27%3B%0A%20%20%2Dwebkit%2Dfont%2Dsmoothing%3A%20antialiased%3B%0A%20%20%2Dmoz%2Dosx%2Dfont%2Dsmoothing%3A%20grayscale%3B%0A%7D%0A%0A%23xpbntktnos%20thead%2C%20%23xpbntktnos%20tbody%2C%20%23xpbntktnos%20tfoot%2C%20%23xpbntktnos%20tr%2C%20%23xpbntktnos%20td%2C%20%23xpbntktnos%20th%20%7B%0A%20%20border%2Dstyle%3A%20none%3B%0A%7D%0A%0A%23xpbntktnos%20p%20%7B%0A%20%20margin%3A%200%3B%0A%20%20padding%3A%200%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Ftable%20%7B%0A%20%20display%3A%20table%3B%0A%20%20border%2Dcollapse%3A%20collapse%3B%0A%20%20line%2Dheight%3A%20normal%3B%0A%20%20margin%2Dleft%3A%20auto%3B%0A%20%20margin%2Dright%3A%20auto%3B%0A%20%20color%3A%20%23333333%3B%0A%20%20font%2Dsize%3A%2016px%3B%0A%20%20font%2Dweight%3A%20normal%3B%0A%20%20font%2Dstyle%3A%20normal%3B%0A%20%20background%2Dcolor%3A%20%23FFFFFF%3B%0A%20%20width%3A%20auto%3B%0A%20%20border%2Dtop%2Dstyle%3A%20solid%3B%0A%20%20border%2Dtop%2Dwidth%3A%202px%3B%0A%20%20border%2Dtop%2Dcolor%3A%20%23A8A8A8%3B%0A%20%20border%2Dright%2Dstyle%3A%20none%3B%0A%20%20border%2Dright%2Dwidth%3A%202px%3B%0A%20%20border%2Dright%2Dcolor%3A%20%23D3D3D3%3B%0A%20%20border%2Dbottom%2Dstyle%3A%20solid%3B%0A%20%20border%2Dbottom%2Dwidth%3A%202px%3B%0A%20%20border%2Dbottom%2Dcolor%3A%20%23A8A8A8%3B%0A%20%20border%2Dleft%2Dstyle%3A%20none%3B%0A%20%20border%2Dleft%2Dwidth%3A%202px%3B%0A%20%20border%2Dleft%2Dcolor%3A%20%23D3D3D3%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Fcaption%20%7B%0A%20%20padding%2Dtop%3A%204px%3B%0A%20%20padding%2Dbottom%3A%204px%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Ftitle%20%7B%0A%20%20color%3A%20%23333333%3B%0A%20%20font%2Dsize%3A%20125%25%3B%0A%20%20font%2Dweight%3A%20initial%3B%0A%20%20padding%2Dtop%3A%204px%3B%0A%20%20padding%2Dbottom%3A%204px%3B%0A%20%20padding%2Dleft%3A%205px%3B%0A%20%20padding%2Dright%3A%205px%3B%0A%20%20border%2Dbottom%2Dcolor%3A%20%23FFFFFF%3B%0A%20%20border%2Dbottom%2Dwidth%3A%200%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Fsubtitle%20%7B%0A%20%20color%3A%20%23333333%3B%0A%20%20font%2Dsize%3A%2085%25%3B%0A%20%20font%2Dweight%3A%20initial%3B%0A%20%20padding%2Dtop%3A%203px%3B%0A%20%20padding%2Dbottom%3A%205px%3B%0A%20%20padding%2Dleft%3A%205px%3B%0A%20%20padding%2Dright%3A%205px%3B%0A%20%20border%2Dtop%2Dcolor%3A%20%23FFFFFF%3B%0A%20%20border%2Dtop%2Dwidth%3A%200%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Fheading%20%7B%0A%20%20background%2Dcolor%3A%20%23FFFFFF%3B%0A%20%20text%2Dalign%3A%20center%3B%0A%20%20border%2Dbottom%2Dcolor%3A%20%23FFFFFF%3B%0A%20%20border%2Dleft%2Dstyle%3A%20none%3B%0A%20%20border%2Dleft%2Dwidth%3A%201px%3B%0A%20%20border%2Dleft%2Dcolor%3A%20%23D3D3D3%3B%0A%20%20border%2Dright%2Dstyle%3A%20none%3B%0A%20%20border%2Dright%2Dwidth%3A%201px%3B%0A%20%20border%2Dright%2Dcolor%3A%20%23D3D3D3%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Fbottom%5Fborder%20%7B%0A%20%20border%2Dbottom%2Dstyle%3A%20solid%3B%0A%20%20border%2Dbottom%2Dwidth%3A%202px%3B%0A%20%20border%2Dbottom%2Dcolor%3A%20%23D3D3D3%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Fcol%5Fheadings%20%7B%0A%20%20border%2Dtop%2Dstyle%3A%20solid%3B%0A%20%20border%2Dtop%2Dwidth%3A%202px%3B%0A%20%20border%2Dtop%2Dcolor%3A%20%23D3D3D3%3B%0A%20%20border%2Dbottom%2Dstyle%3A%20solid%3B%0A%20%20border%2Dbottom%2Dwidth%3A%202px%3B%0A%20%20border%2Dbottom%2Dcolor%3A%20%23D3D3D3%3B%0A%20%20border%2Dleft%2Dstyle%3A%20none%3B%0A%20%20border%2Dleft%2Dwidth%3A%201px%3B%0A%20%20border%2Dleft%2Dcolor%3A%20%23D3D3D3%3B%0A%20%20border%2Dright%2Dstyle%3A%20none%3B%0A%20%20border%2Dright%2Dwidth%3A%201px%3B%0A%20%20border%2Dright%2Dcolor%3A%20%23D3D3D3%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Fcol%5Fheading%20%7B%0A%20%20color%3A%20%23333333%3B%0A%20%20background%2Dcolor%3A%20%23FFFFFF%3B%0A%20%20font%2Dsize%3A%20100%25%3B%0A%20%20font%2Dweight%3A%20normal%3B%0A%20%20text%2Dtransform%3A%20inherit%3B%0A%20%20border%2Dleft%2Dstyle%3A%20none%3B%0A%20%20border%2Dleft%2Dwidth%3A%201px%3B%0A%20%20border%2Dleft%2Dcolor%3A%20%23D3D3D3%3B%0A%20%20border%2Dright%2Dstyle%3A%20none%3B%0A%20%20border%2Dright%2Dwidth%3A%201px%3B%0A%20%20border%2Dright%2Dcolor%3A%20%23D3D3D3%3B%0A%20%20vertical%2Dalign%3A%20bottom%3B%0A%20%20padding%2Dtop%3A%205px%3B%0A%20%20padding%2Dbottom%3A%206px%3B%0A%20%20padding%2Dleft%3A%205px%3B%0A%20%20padding%2Dright%3A%205px%3B%0A%20%20overflow%2Dx%3A%20hidden%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Fcolumn%5Fspanner%5Fouter%20%7B%0A%20%20color%3A%20%23333333%3B%0A%20%20background%2Dcolor%3A%20%23FFFFFF%3B%0A%20%20font%2Dsize%3A%20100%25%3B%0A%20%20font%2Dweight%3A%20normal%3B%0A%20%20text%2Dtransform%3A%20inherit%3B%0A%20%20padding%2Dtop%3A%200%3B%0A%20%20padding%2Dbottom%3A%200%3B%0A%20%20padding%2Dleft%3A%204px%3B%0A%20%20padding%2Dright%3A%204px%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Fcolumn%5Fspanner%5Fouter%3Afirst%2Dchild%20%7B%0A%20%20padding%2Dleft%3A%200%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Fcolumn%5Fspanner%5Fouter%3Alast%2Dchild%20%7B%0A%20%20padding%2Dright%3A%200%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Fcolumn%5Fspanner%20%7B%0A%20%20border%2Dbottom%2Dstyle%3A%20solid%3B%0A%20%20border%2Dbottom%2Dwidth%3A%202px%3B%0A%20%20border%2Dbottom%2Dcolor%3A%20%23D3D3D3%3B%0A%20%20vertical%2Dalign%3A%20bottom%3B%0A%20%20padding%2Dtop%3A%205px%3B%0A%20%20padding%2Dbottom%3A%205px%3B%0A%20%20overflow%2Dx%3A%20hidden%3B%0A%20%20display%3A%20inline%2Dblock%3B%0A%20%20width%3A%20100%25%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Fspanner%5Frow%20%7B%0A%20%20border%2Dbottom%2Dstyle%3A%20hidden%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Fgroup%5Fheading%20%7B%0A%20%20padding%2Dtop%3A%208px%3B%0A%20%20padding%2Dbottom%3A%208px%3B%0A%20%20padding%2Dleft%3A%205px%3B%0A%20%20padding%2Dright%3A%205px%3B%0A%20%20color%3A%20%23333333%3B%0A%20%20background%2Dcolor%3A%20%23FFFFFF%3B%0A%20%20font%2Dsize%3A%20100%25%3B%0A%20%20font%2Dweight%3A%20initial%3B%0A%20%20text%2Dtransform%3A%20inherit%3B%0A%20%20border%2Dtop%2Dstyle%3A%20solid%3B%0A%20%20border%2Dtop%2Dwidth%3A%202px%3B%0A%20%20border%2Dtop%2Dcolor%3A%20%23D3D3D3%3B%0A%20%20border%2Dbottom%2Dstyle%3A%20solid%3B%0A%20%20border%2Dbottom%2Dwidth%3A%202px%3B%0A%20%20border%2Dbottom%2Dcolor%3A%20%23D3D3D3%3B%0A%20%20border%2Dleft%2Dstyle%3A%20none%3B%0A%20%20border%2Dleft%2Dwidth%3A%201px%3B%0A%20%20border%2Dleft%2Dcolor%3A%20%23D3D3D3%3B%0A%20%20border%2Dright%2Dstyle%3A%20none%3B%0A%20%20border%2Dright%2Dwidth%3A%201px%3B%0A%20%20border%2Dright%2Dcolor%3A%20%23D3D3D3%3B%0A%20%20vertical%2Dalign%3A%20middle%3B%0A%20%20text%2Dalign%3A%20left%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Fempty%5Fgroup%5Fheading%20%7B%0A%20%20padding%3A%200%2E5px%3B%0A%20%20color%3A%20%23333333%3B%0A%20%20background%2Dcolor%3A%20%23FFFFFF%3B%0A%20%20font%2Dsize%3A%20100%25%3B%0A%20%20font%2Dweight%3A%20initial%3B%0A%20%20border%2Dtop%2Dstyle%3A%20solid%3B%0A%20%20border%2Dtop%2Dwidth%3A%202px%3B%0A%20%20border%2Dtop%2Dcolor%3A%20%23D3D3D3%3B%0A%20%20border%2Dbottom%2Dstyle%3A%20solid%3B%0A%20%20border%2Dbottom%2Dwidth%3A%202px%3B%0A%20%20border%2Dbottom%2Dcolor%3A%20%23D3D3D3%3B%0A%20%20vertical%2Dalign%3A%20middle%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Ffrom%5Fmd%20%3E%20%3Afirst%2Dchild%20%7B%0A%20%20margin%2Dtop%3A%200%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Ffrom%5Fmd%20%3E%20%3Alast%2Dchild%20%7B%0A%20%20margin%2Dbottom%3A%200%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Frow%20%7B%0A%20%20padding%2Dtop%3A%208px%3B%0A%20%20padding%2Dbottom%3A%208px%3B%0A%20%20padding%2Dleft%3A%205px%3B%0A%20%20padding%2Dright%3A%205px%3B%0A%20%20margin%3A%2010px%3B%0A%20%20border%2Dtop%2Dstyle%3A%20solid%3B%0A%20%20border%2Dtop%2Dwidth%3A%201px%3B%0A%20%20border%2Dtop%2Dcolor%3A%20%23D3D3D3%3B%0A%20%20border%2Dleft%2Dstyle%3A%20none%3B%0A%20%20border%2Dleft%2Dwidth%3A%201px%3B%0A%20%20border%2Dleft%2Dcolor%3A%20%23D3D3D3%3B%0A%20%20border%2Dright%2Dstyle%3A%20none%3B%0A%20%20border%2Dright%2Dwidth%3A%201px%3B%0A%20%20border%2Dright%2Dcolor%3A%20%23D3D3D3%3B%0A%20%20vertical%2Dalign%3A%20middle%3B%0A%20%20overflow%2Dx%3A%20hidden%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Fstub%20%7B%0A%20%20color%3A%20%23333333%3B%0A%20%20background%2Dcolor%3A%20%23FFFFFF%3B%0A%20%20font%2Dsize%3A%20100%25%3B%0A%20%20font%2Dweight%3A%20initial%3B%0A%20%20text%2Dtransform%3A%20inherit%3B%0A%20%20border%2Dright%2Dstyle%3A%20solid%3B%0A%20%20border%2Dright%2Dwidth%3A%202px%3B%0A%20%20border%2Dright%2Dcolor%3A%20%23D3D3D3%3B%0A%20%20padding%2Dleft%3A%205px%3B%0A%20%20padding%2Dright%3A%205px%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Fstub%5Frow%5Fgroup%20%7B%0A%20%20color%3A%20%23333333%3B%0A%20%20background%2Dcolor%3A%20%23FFFFFF%3B%0A%20%20font%2Dsize%3A%20100%25%3B%0A%20%20font%2Dweight%3A%20initial%3B%0A%20%20text%2Dtransform%3A%20inherit%3B%0A%20%20border%2Dright%2Dstyle%3A%20solid%3B%0A%20%20border%2Dright%2Dwidth%3A%202px%3B%0A%20%20border%2Dright%2Dcolor%3A%20%23D3D3D3%3B%0A%20%20padding%2Dleft%3A%205px%3B%0A%20%20padding%2Dright%3A%205px%3B%0A%20%20vertical%2Dalign%3A%20top%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Frow%5Fgroup%5Ffirst%20td%20%7B%0A%20%20border%2Dtop%2Dwidth%3A%202px%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Frow%5Fgroup%5Ffirst%20th%20%7B%0A%20%20border%2Dtop%2Dwidth%3A%202px%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Fsummary%5Frow%20%7B%0A%20%20color%3A%20%23333333%3B%0A%20%20background%2Dcolor%3A%20%23FFFFFF%3B%0A%20%20text%2Dtransform%3A%20inherit%3B%0A%20%20padding%2Dtop%3A%208px%3B%0A%20%20padding%2Dbottom%3A%208px%3B%0A%20%20padding%2Dleft%3A%205px%3B%0A%20%20padding%2Dright%3A%205px%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Ffirst%5Fsummary%5Frow%20%7B%0A%20%20border%2Dtop%2Dstyle%3A%20solid%3B%0A%20%20border%2Dtop%2Dcolor%3A%20%23D3D3D3%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Ffirst%5Fsummary%5Frow%2Ethick%20%7B%0A%20%20border%2Dtop%2Dwidth%3A%202px%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Flast%5Fsummary%5Frow%20%7B%0A%20%20padding%2Dtop%3A%208px%3B%0A%20%20padding%2Dbottom%3A%208px%3B%0A%20%20padding%2Dleft%3A%205px%3B%0A%20%20padding%2Dright%3A%205px%3B%0A%20%20border%2Dbottom%2Dstyle%3A%20solid%3B%0A%20%20border%2Dbottom%2Dwidth%3A%202px%3B%0A%20%20border%2Dbottom%2Dcolor%3A%20%23D3D3D3%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Fgrand%5Fsummary%5Frow%20%7B%0A%20%20color%3A%20%23333333%3B%0A%20%20background%2Dcolor%3A%20%23FFFFFF%3B%0A%20%20text%2Dtransform%3A%20inherit%3B%0A%20%20padding%2Dtop%3A%208px%3B%0A%20%20padding%2Dbottom%3A%208px%3B%0A%20%20padding%2Dleft%3A%205px%3B%0A%20%20padding%2Dright%3A%205px%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Ffirst%5Fgrand%5Fsummary%5Frow%20%7B%0A%20%20padding%2Dtop%3A%208px%3B%0A%20%20padding%2Dbottom%3A%208px%3B%0A%20%20padding%2Dleft%3A%205px%3B%0A%20%20padding%2Dright%3A%205px%3B%0A%20%20border%2Dtop%2Dstyle%3A%20double%3B%0A%20%20border%2Dtop%2Dwidth%3A%206px%3B%0A%20%20border%2Dtop%2Dcolor%3A%20%23D3D3D3%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Flast%5Fgrand%5Fsummary%5Frow%5Ftop%20%7B%0A%20%20padding%2Dtop%3A%208px%3B%0A%20%20padding%2Dbottom%3A%208px%3B%0A%20%20padding%2Dleft%3A%205px%3B%0A%20%20padding%2Dright%3A%205px%3B%0A%20%20border%2Dbottom%2Dstyle%3A%20double%3B%0A%20%20border%2Dbottom%2Dwidth%3A%206px%3B%0A%20%20border%2Dbottom%2Dcolor%3A%20%23D3D3D3%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Fstriped%20%7B%0A%20%20background%2Dcolor%3A%20rgba%28128%2C%20128%2C%20128%2C%200%2E05%29%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Ftable%5Fbody%20%7B%0A%20%20border%2Dtop%2Dstyle%3A%20solid%3B%0A%20%20border%2Dtop%2Dwidth%3A%202px%3B%0A%20%20border%2Dtop%2Dcolor%3A%20%23D3D3D3%3B%0A%20%20border%2Dbottom%2Dstyle%3A%20solid%3B%0A%20%20border%2Dbottom%2Dwidth%3A%202px%3B%0A%20%20border%2Dbottom%2Dcolor%3A%20%23D3D3D3%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Ffootnotes%20%7B%0A%20%20color%3A%20%23333333%3B%0A%20%20background%2Dcolor%3A%20%23FFFFFF%3B%0A%20%20border%2Dbottom%2Dstyle%3A%20none%3B%0A%20%20border%2Dbottom%2Dwidth%3A%202px%3B%0A%20%20border%2Dbottom%2Dcolor%3A%20%23D3D3D3%3B%0A%20%20border%2Dleft%2Dstyle%3A%20none%3B%0A%20%20border%2Dleft%2Dwidth%3A%202px%3B%0A%20%20border%2Dleft%2Dcolor%3A%20%23D3D3D3%3B%0A%20%20border%2Dright%2Dstyle%3A%20none%3B%0A%20%20border%2Dright%2Dwidth%3A%202px%3B%0A%20%20border%2Dright%2Dcolor%3A%20%23D3D3D3%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Ffootnote%20%7B%0A%20%20margin%3A%200px%3B%0A%20%20font%2Dsize%3A%2090%25%3B%0A%20%20padding%2Dtop%3A%204px%3B%0A%20%20padding%2Dbottom%3A%204px%3B%0A%20%20padding%2Dleft%3A%205px%3B%0A%20%20padding%2Dright%3A%205px%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Fsourcenotes%20%7B%0A%20%20color%3A%20%23333333%3B%0A%20%20background%2Dcolor%3A%20%23FFFFFF%3B%0A%20%20border%2Dbottom%2Dstyle%3A%20none%3B%0A%20%20border%2Dbottom%2Dwidth%3A%202px%3B%0A%20%20border%2Dbottom%2Dcolor%3A%20%23D3D3D3%3B%0A%20%20border%2Dleft%2Dstyle%3A%20none%3B%0A%20%20border%2Dleft%2Dwidth%3A%202px%3B%0A%20%20border%2Dleft%2Dcolor%3A%20%23D3D3D3%3B%0A%20%20border%2Dright%2Dstyle%3A%20none%3B%0A%20%20border%2Dright%2Dwidth%3A%202px%3B%0A%20%20border%2Dright%2Dcolor%3A%20%23D3D3D3%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Fsourcenote%20%7B%0A%20%20font%2Dsize%3A%2090%25%3B%0A%20%20padding%2Dtop%3A%204px%3B%0A%20%20padding%2Dbottom%3A%204px%3B%0A%20%20padding%2Dleft%3A%205px%3B%0A%20%20padding%2Dright%3A%205px%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Fleft%20%7B%0A%20%20text%2Dalign%3A%20left%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Fcenter%20%7B%0A%20%20text%2Dalign%3A%20center%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Fright%20%7B%0A%20%20text%2Dalign%3A%20right%3B%0A%20%20font%2Dvariant%2Dnumeric%3A%20tabular%2Dnums%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Ffont%5Fnormal%20%7B%0A%20%20font%2Dweight%3A%20normal%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Ffont%5Fbold%20%7B%0A%20%20font%2Dweight%3A%20bold%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Ffont%5Fitalic%20%7B%0A%20%20font%2Dstyle%3A%20italic%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Fsuper%20%7B%0A%20%20font%2Dsize%3A%2065%25%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Ffootnote%5Fmarks%20%7B%0A%20%20font%2Dsize%3A%2075%25%3B%0A%20%20vertical%2Dalign%3A%200%2E4em%3B%0A%20%20position%3A%20initial%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Fasterisk%20%7B%0A%20%20font%2Dsize%3A%20100%25%3B%0A%20%20vertical%2Dalign%3A%200%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Findent%5F1%20%7B%0A%20%20text%2Dindent%3A%205px%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Findent%5F2%20%7B%0A%20%20text%2Dindent%3A%2010px%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Findent%5F3%20%7B%0A%20%20text%2Dindent%3A%2015px%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Findent%5F4%20%7B%0A%20%20text%2Dindent%3A%2020px%3B%0A%7D%0A%0A%23xpbntktnos%20%2Egt%5Findent%5F5%20%7B%0A%20%20text%2Dindent%3A%2025px%3B%0A%7D%0A%0A%23xpbntktnos%20%2Ekatex%2Ddisplay%20%7B%0A%20%20display%3A%20inline%2Dflex%20%21important%3B%0A%20%20margin%2Dbottom%3A%200%2E75em%20%21important%3B%0A%7D%0A%0A%23xpbntktnos%20div%2EReactable%20%3E%20div%2Ert%2Dtable%20%3E%20div%2Ert%2Dthead%20%3E%20div%2Ert%2Dtr%2Ert%2Dtr%2Dgroup%2Dheader%20%3E%20div%2Ert%2Dth%2Dgroup%3Aafter%20%7B%0A%20%20height%3A%200px%20%21important%3B%0A%7D%0A%3C%2Fstyle%3E%0A%20%20%3Ctable%20class%3D%22gt%5Ftable%22%20data%2Dquarto%2Ddisable%2Dprocessing%3D%22false%22%20data%2Dquarto%2Dbootstrap%3D%22false%22%3E%0A%20%20%3Cthead%3E%0A%20%20%20%20%3Ctr%20class%3D%22gt%5Fcol%5Fheadings%22%3E%0A%20%20%20%20%20%20%3Cth%20class%3D%22gt%5Fcol%5Fheading%20gt%5Fcolumns%5Fbottom%5Fborder%20gt%5Fleft%22%20rowspan%3D%221%22%20colspan%3D%221%22%20scope%3D%22col%22%20id%3D%22label%22%3E%3Cspan%20data%2Dqmd%2Dbase64%3D%22PHN0cm9uZz5DaGFyYWN0ZXJpc3RpYzwvc3Ryb25nPg%3D%3D%22%3E%3Cspan%20class%3D%27gt%5Ffrom%5Fmd%27%3E%3Cstrong%3ECharacteristic%3C%2Fstrong%3E%3C%2Fspan%3E%3C%2Fspan%3E%3C%2Fth%3E%0A%20%20%20%20%20%20%3Cth%20class%3D%22gt%5Fcol%5Fheading%20gt%5Fcolumns%5Fbottom%5Fborder%20gt%5Fcenter%22%20rowspan%3D%221%22%20colspan%3D%221%22%20scope%3D%22col%22%20id%3D%22stat%5F2%22%3E%3Cspan%20data%2Dqmd%2Dbase64%3D%22PHN0cm9uZz5UUlVFPC9zdHJvbmc%2BPGJyIC8%2BCk4gPSA0NiwzMzc%3D%22%3E%3Cspan%20class%3D%27gt%5Ffrom%5Fmd%27%3E%3Cstrong%3ETRUE%3C%2Fstrong%3E%3Cbr%20%2F%3E%0AN%20%3D%2046%2C337%3C%2Fspan%3E%3C%2Fspan%3E%3Cspan%20class%3D%22gt%5Ffootnote%5Fmarks%22%20style%3D%22white%2Dspace%3Anowrap%3Bfont%2Dstyle%3Aitalic%3Bfont%2Dweight%3Anormal%3Bline%2Dheight%3A0%3B%22%3E%3Csup%3E1%3C%2Fsup%3E%3C%2Fspan%3E%3C%2Fth%3E%0A%20%20%20%20%20%20%3Cth%20class%3D%22gt%5Fcol%5Fheading%20gt%5Fcolumns%5Fbottom%5Fborder%20gt%5Fcenter%22%20rowspan%3D%221%22%20colspan%3D%221%22%20scope%3D%22col%22%20id%3D%22stat%5F1%22%3E%3Cspan%20data%2Dqmd%2Dbase64%3D%22PHN0cm9uZz5GQUxTRTwvc3Ryb25nPjxiciAvPgpOID0gNDgsMTA3%22%3E%3Cspan%20class%3D%27gt%5Ffrom%5Fmd%27%3E%3Cstrong%3EFALSE%3C%2Fstrong%3E%3Cbr%20%2F%3E%0AN%20%3D%2048%2C107%3C%2Fspan%3E%3C%2Fspan%3E%3Cspan%20class%3D%22gt%5Ffootnote%5Fmarks%22%20style%3D%22white%2Dspace%3Anowrap%3Bfont%2Dstyle%3Aitalic%3Bfont%2Dweight%3Anormal%3Bline%2Dheight%3A0%3B%22%3E%3Csup%3E1%3C%2Fsup%3E%3C%2Fspan%3E%3C%2Fth%3E%0A%20%20%20%20%3C%2Ftr%3E%0A%20%20%3C%2Fthead%3E%0A%20%20%3Ctbody%20class%3D%22gt%5Ftable%5Fbody%22%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3Efirst%5Fcareunit%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E%3Cbr%20%2F%3E%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E%3Cbr%20%2F%3E%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Cardiac%20Vascular%20Intensive%20Care%20Unit%20%28CVICU%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E7%2C353%20%2816%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E7%2C416%20%2815%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Medical%20Intensive%20Care%20Unit%20%28MICU%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E9%2C837%20%2821%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E10%2C862%20%2823%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Medical%2FSurgical%20Intensive%20Care%20Unit%20%28MICU%2FSICU%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E6%2C667%20%2814%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E8%2C780%20%2818%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Surgical%20Intensive%20Care%20Unit%20%28SICU%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E6%2C434%20%2814%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E6%2C574%20%2814%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Other%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E16%2C046%20%2835%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E14%2C475%20%2830%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3Elast%5Fcareunit%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E%3Cbr%20%2F%3E%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E%3Cbr%20%2F%3E%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Cardiac%20Vascular%20Intensive%20Care%20Unit%20%28CVICU%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E7%2C353%20%2816%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E7%2C416%20%2815%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Medical%20Intensive%20Care%20Unit%20%28MICU%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E9%2C837%20%2821%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E10%2C862%20%2823%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Medical%2FSurgical%20Intensive%20Care%20Unit%20%28MICU%2FSICU%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E6%2C667%20%2814%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E8%2C780%20%2818%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Surgical%20Intensive%20Care%20Unit%20%28SICU%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E6%2C434%20%2814%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E6%2C574%20%2814%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Other%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E16%2C046%20%2835%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E14%2C475%20%2830%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3Elos%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E3%2E9%20%282%2E7%2C%206%2E8%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E1%2E1%20%280%2E8%2C%201%2E5%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3Eadmission%5Ftype%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E%3Cbr%20%2F%3E%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E%3Cbr%20%2F%3E%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0EW%20EMER%2E%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E23%2C012%20%2850%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E25%2C337%20%2853%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0OBSERVATION%20ADMIT%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E7%2C393%20%2816%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E6%2C638%20%2814%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0SURGICAL%20SAME%20DAY%20ADMISSION%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E4%2C001%20%288%2E6%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E5%2C543%20%2812%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0URGENT%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E8%2C691%20%2819%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E6%2C683%20%2814%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Other%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E3%2C240%20%287%2E0%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E3%2C906%20%288%2E1%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3Eadmission%5Flocation%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E%3Cbr%20%2F%3E%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E%3Cbr%20%2F%3E%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0EMERGENCY%20ROOM%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E17%2C058%20%2837%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E20%2C443%20%2842%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0PHYSICIAN%20REFERRAL%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E11%2C013%20%2824%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E12%2C684%20%2826%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0TRANSFER%20FROM%20HOSPITAL%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E13%2C904%20%2830%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E10%2C400%20%2822%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Other%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E4%2C362%20%289%2E4%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E4%2C580%20%289%2E5%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3Edischarge%5Flocation%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E%3Cbr%20%2F%3E%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E%3Cbr%20%2F%3E%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0DIED%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E6%2C884%20%2815%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E4%2C436%20%289%2E4%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0HOME%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E6%2C879%20%2815%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E15%2C210%20%2832%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0HOME%20HEALTH%20CARE%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E10%2C620%20%2823%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E13%2C422%20%2828%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0SKILLED%20NURSING%20FACILITY%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E8%2C785%20%2819%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E7%2C489%20%2816%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Other%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E13%2C092%20%2828%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E6%2C779%20%2814%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Unknown%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E77%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E771%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3Einsurance%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E%3Cbr%20%2F%3E%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E%3Cbr%20%2F%3E%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Medicaid%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E6%2C768%20%2815%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E7%2C469%20%2816%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Medicare%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E26%2C330%20%2858%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E25%2C485%20%2854%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0No%20charge%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E5%20%28%26lt%3B0%2E1%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E3%20%28%26lt%3B0%2E1%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Other%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E1%2C091%20%282%2E4%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E1%2C237%20%282%2E6%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Private%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E11%2C515%20%2825%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E13%2C018%20%2828%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Unknown%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E628%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E895%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3Elanguage%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E%3Cbr%20%2F%3E%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E%3Cbr%20%2F%3E%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0American%20Sign%20Language%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E29%20%28%26lt%3B0%2E1%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E34%20%28%26lt%3B0%2E1%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Amharic%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E14%20%28%26lt%3B0%2E1%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E9%20%28%26lt%3B0%2E1%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Arabic%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E87%20%280%2E2%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E62%20%280%2E1%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Armenian%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E12%20%28%26lt%3B0%2E1%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E13%20%28%26lt%3B0%2E1%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Bengali%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E22%20%28%26lt%3B0%2E1%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E12%20%28%26lt%3B0%2E1%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Chinese%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E550%20%281%2E2%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E611%20%281%2E3%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0English%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E41%2C563%20%2890%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E43%2C483%20%2891%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0French%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E18%20%28%26lt%3B0%2E1%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E14%20%28%26lt%3B0%2E1%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Haitian%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E375%20%280%2E8%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E252%20%280%2E5%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Hindi%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E24%20%28%26lt%3B0%2E1%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E21%20%28%26lt%3B0%2E1%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Italian%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E101%20%280%2E2%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E107%20%280%2E2%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Japanese%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E5%20%28%26lt%3B0%2E1%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E7%20%28%26lt%3B0%2E1%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Kabuverdianu%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E301%20%280%2E7%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E345%20%280%2E7%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Khmer%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E50%20%280%2E1%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E37%20%28%26lt%3B0%2E1%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Korean%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E40%20%28%26lt%3B0%2E1%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E32%20%28%26lt%3B0%2E1%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Modern%20Greek%20%281453%2D%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E102%20%280%2E2%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E88%20%280%2E2%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Other%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E152%20%280%2E3%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E153%20%280%2E3%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Persian%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E42%20%28%26lt%3B0%2E1%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E35%20%28%26lt%3B0%2E1%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Polish%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E36%20%28%26lt%3B0%2E1%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E38%20%28%26lt%3B0%2E1%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Portuguese%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E351%20%280%2E8%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E314%20%280%2E7%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Russian%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E601%20%281%2E3%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E659%20%281%2E4%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Somali%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E8%20%28%26lt%3B0%2E1%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E15%20%28%26lt%3B0%2E1%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Spanish%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E1%2C472%20%283%2E2%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E1%2C429%20%283%2E0%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Thai%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E21%20%28%26lt%3B0%2E1%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E22%20%28%26lt%3B0%2E1%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Vietnamese%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E151%20%280%2E3%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E129%20%280%2E3%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Unknown%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E210%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E186%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3Emarital%5Fstatus%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E%3Cbr%20%2F%3E%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E%3Cbr%20%2F%3E%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0DIVORCED%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E3%2C377%20%288%2E0%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E3%2C555%20%288%2E0%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0MARRIED%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E20%2C557%20%2849%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E21%2C344%20%2848%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0SINGLE%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E12%2C745%20%2830%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E14%2C039%20%2831%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0WIDOWED%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E5%2C319%20%2813%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E5%2C752%20%2813%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Unknown%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E4%2C339%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E3%2C417%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3Erace%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E%3Cbr%20%2F%3E%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E%3Cbr%20%2F%3E%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0ASIAN%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E1%2C369%20%283%2E0%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E1%2C516%20%283%2E2%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0BLACK%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E4%2C933%20%2811%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E5%2C452%20%2811%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0HISPANIC%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E1%2C687%20%283%2E6%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E1%2C908%20%284%2E0%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0WHITE%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E30%2C312%20%2865%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E32%2C351%20%2867%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Other%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E8%2C036%20%2817%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E6%2C880%20%2814%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3Ehospital%5Fexpire%5Fflag%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E6%2C831%20%2815%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E4%2C512%20%289%2E4%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3Egender%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E%3Cbr%20%2F%3E%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E%3Cbr%20%2F%3E%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0F%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E20%2C106%20%2843%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E21%2C471%20%2845%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0M%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E26%2C231%20%2857%25%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E26%2C636%20%2855%25%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3Edod%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E2155%2D09%2D06%20%282135%2D07%2D16%2C%202175%2D10%2D08%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E2155%2D12%2D18%20%282136%2D04%2D26%2C%20NA%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Unknown%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E25%2C846%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E30%2C639%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3Echloride%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E102%20%2898%2C%20105%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E102%20%2898%2C%20105%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Unknown%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E6%2C184%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E5%2C167%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3Ecreatinine%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E1%2E00%20%280%2E80%2C%201%2E60%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E1%2E00%20%280%2E80%2C%201%2E40%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Unknown%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E4%2C541%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E3%2C486%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3Esodium%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E138%2E0%20%28135%2E0%2C%20141%2E0%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E139%2E0%20%28136%2E0%2C%20141%2E0%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Unknown%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E6%2C167%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E5%2C163%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3Epotassium%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E4%2E20%20%283%2E90%2C%204%2E70%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E4%2E20%20%283%2E90%2C%204%2E60%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Unknown%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E6%2C200%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E5%2C187%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3Eglucose%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E122%20%28100%2C%20159%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E118%20%2898%2C%20154%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Unknown%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E6%2C340%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E5%2C314%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3Ehematocrit%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E35%20%2829%2C%2040%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E36%20%2830%2C%2041%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Unknown%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E3%2C857%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E2%2C894%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3Ewbc%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E9%2E7%20%287%2E0%2C%2013%2E8%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E9%2E0%20%286%2E6%2C%2012%2E6%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Unknown%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E3%2C906%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E2%2C944%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3Ebicarbonate%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E24%2E0%20%2821%2E0%2C%2027%2E0%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E24%2E0%20%2821%2E0%2C%2027%2E0%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Unknown%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E6%2C272%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E5%2C277%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3Enon%5Finvasive%5Fblood%5Fpressure%5Fsystolic%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E119%20%28104%2C%20137%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E122%20%28107%2C%20138%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Unknown%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E348%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E1%2C022%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3Enon%5Finvasive%5Fblood%5Fpressure%5Fdiastolic%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E67%20%2857%2C%2079%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E68%20%2858%2C%2080%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Unknown%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E351%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E1%2C024%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3Erespiratory%5Frate%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E19%2E0%20%2816%2E0%2C%2023%2E0%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E18%2E0%20%2815%2E0%2C%2022%2E0%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Unknown%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E15%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E183%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3Etemperature%5Ffahrenheit%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E98%2E20%20%2897%2E70%2C%2098%2E80%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E98%2E10%20%2897%2E60%2C%2098%2E60%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Unknown%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E231%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E1%2C444%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3Eheart%5Frate%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E87%20%2875%2C%20102%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E84%20%2873%2C%2099%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3E%C2%A0%C2%A0%C2%A0%C2%A0Unknown%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E1%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E85%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%20%20%3Ctr%3E%3Ctd%20headers%3D%22label%22%20class%3D%22gt%5Frow%20gt%5Fleft%22%3Eage%5Fintime%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F2%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E67%20%2856%2C%2077%29%3C%2Ftd%3E%0A%3Ctd%20headers%3D%22stat%5F1%22%20class%3D%22gt%5Frow%20gt%5Fcenter%22%3E66%20%2854%2C%2077%29%3C%2Ftd%3E%3C%2Ftr%3E%0A%20%20%3C%2Ftbody%3E%0A%20%20%0A%20%20%3Ctfoot%20class%3D%22gt%5Ffootnotes%22%3E%0A%20%20%20%20%3Ctr%3E%0A%20%20%20%20%20%20%3Ctd%20class%3D%22gt%5Ffootnote%22%20colspan%3D%223%22%3E%3Cspan%20class%3D%22gt%5Ffootnote%5Fmarks%22%20style%3D%22white%2Dspace%3Anowrap%3Bfont%2Dstyle%3Aitalic%3Bfont%2Dweight%3Anormal%3Bline%2Dheight%3A0%3B%22%3E%3Csup%3E1%3C%2Fsup%3E%3C%2Fspan%3E%20%3Cspan%20data%2Dqmd%2Dbase64%3D%22biAoJSk7IE1lZGlhbiAoUTEsIFEzKQ%3D%3D%22%3E%3Cspan%20class%3D%27gt%5Ffrom%5Fmd%27%3En%20%28%25%29%3B%20Median%20%28Q1%2C%20Q3%29%3C%2Fspan%3E%3C%2Fspan%3E%3C%2Ftd%3E%0A%20%20%20%20%3C%2Ftr%3E%0A%20%20%3C%2Ftfoot%3E%0A%3C%2Ftable%3E%0A%3C%2Fdiv%3E%0A%3C%2Fbody%3E%0A%3C%2Fhtml%3E%0A">
 </iframe>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>mimic_icu_cohort_clean <span class="ot">&lt;-</span> mimic_icu_cohort <span class="sc">%&gt;%</span></span>
-<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">first_careunit      =</span> <span class="fu">fct_lump_n</span>(first_careunit, <span class="at">n =</span> <span class="dv">4</span>, <span class="at">other_level =</span> <span class="st">&quot;Other&quot;</span>),</span>
-<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">last_careunit       =</span> <span class="fu">fct_lump_n</span>(last_careunit,  <span class="at">n =</span> <span class="dv">4</span>, <span class="at">other_level =</span> <span class="st">&quot;Other&quot;</span>),</span>
-<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">admission_type      =</span> <span class="fu">fct_lump_n</span>(admission_type, <span class="at">n =</span> <span class="dv">4</span>, <span class="at">other_level =</span> <span class="st">&quot;Other&quot;</span>),</span>
-<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">admission_location  =</span> <span class="fu">fct_lump_n</span>(admission_location, <span class="at">n =</span> <span class="dv">4</span>, <span class="at">other_level =</span> <span class="st">&quot;Other&quot;</span>),</span>
-<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">discharge_location  =</span> <span class="fu">fct_lump_n</span>(discharge_location, <span class="at">n =</span> <span class="dv">4</span>, <span class="at">other_level =</span> <span class="st">&quot;Other&quot;</span>),</span>
-<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">language =</span> language,</span>
-<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">race =</span> <span class="fu">case_when</span>(</span>
-<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a>      <span class="fu">str_detect</span>(race, <span class="st">&quot;ASIAN&quot;</span>) <span class="sc">~</span> <span class="st">&quot;ASIAN&quot;</span>,</span>
-<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a>      <span class="fu">str_detect</span>(race, <span class="st">&quot;BLACK&quot;</span>) <span class="sc">~</span> <span class="st">&quot;BLACK&quot;</span>,</span>
-<span id="cb41-12"><a href="#cb41-12" aria-hidden="true" tabindex="-1"></a>      <span class="fu">str_detect</span>(race, <span class="st">&quot;HISPANIC&quot;</span>) <span class="sc">~</span> <span class="st">&quot;HISPANIC&quot;</span>,</span>
-<span id="cb41-13"><a href="#cb41-13" aria-hidden="true" tabindex="-1"></a>      <span class="fu">str_detect</span>(race, <span class="st">&quot;WHITE&quot;</span>) <span class="sc">~</span> <span class="st">&quot;WHITE&quot;</span>,</span>
-<span id="cb41-14"><a href="#cb41-14" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">&quot;Other&quot;</span></span>
-<span id="cb41-15"><a href="#cb41-15" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">%&gt;%</span></span>
-<span id="cb41-16"><a href="#cb41-16" aria-hidden="true" tabindex="-1"></a>      <span class="fu">factor</span>(<span class="at">levels =</span> <span class="fu">c</span>(<span class="st">&quot;ASIAN&quot;</span>, <span class="st">&quot;BLACK&quot;</span>, <span class="st">&quot;HISPANIC&quot;</span>, <span class="st">&quot;WHITE&quot;</span>, <span class="st">&quot;Other&quot;</span>)),</span>
-<span id="cb41-17"><a href="#cb41-17" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb41-18"><a href="#cb41-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">los_long =</span> (los <span class="sc">&gt;=</span> <span class="dv">2</span>),</span>
-<span id="cb41-19"><a href="#cb41-19" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb41-20"><a href="#cb41-20" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">non invasive blood pressure systolic</span><span class="st">`</span>  <span class="ot">=</span> <span class="fu">as.numeric</span>(<span class="st">`</span><span class="at">non invasive blood pressure systolic</span><span class="st">`</span>),</span>
-<span id="cb41-21"><a href="#cb41-21" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">non invasive blood pressure diastolic</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">as.numeric</span>(<span class="st">`</span><span class="at">non invasive blood pressure diastolic</span><span class="st">`</span>),</span>
-<span id="cb41-22"><a href="#cb41-22" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">respiratory rate</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">as.numeric</span>(<span class="st">`</span><span class="at">respiratory rate</span><span class="st">`</span>),</span>
-<span id="cb41-23"><a href="#cb41-23" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">temperature fahrenheit</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">as.numeric</span>(<span class="st">`</span><span class="at">temperature fahrenheit</span><span class="st">`</span>),</span>
-<span id="cb41-24"><a href="#cb41-24" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">heart rate</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">as.numeric</span>(<span class="st">`</span><span class="at">heart rate</span><span class="st">`</span>)</span>
-<span id="cb41-25"><a href="#cb41-25" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
-<span id="cb41-26"><a href="#cb41-26" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb41-27"><a href="#cb41-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(</span>
-<span id="cb41-28"><a href="#cb41-28" aria-hidden="true" tabindex="-1"></a>    first_careunit,</span>
-<span id="cb41-29"><a href="#cb41-29" aria-hidden="true" tabindex="-1"></a>    last_careunit,</span>
-<span id="cb41-30"><a href="#cb41-30" aria-hidden="true" tabindex="-1"></a>    los,</span>
-<span id="cb41-31"><a href="#cb41-31" aria-hidden="true" tabindex="-1"></a>    admission_type,</span>
-<span id="cb41-32"><a href="#cb41-32" aria-hidden="true" tabindex="-1"></a>    admission_location,</span>
-<span id="cb41-33"><a href="#cb41-33" aria-hidden="true" tabindex="-1"></a>    discharge_location,</span>
-<span id="cb41-34"><a href="#cb41-34" aria-hidden="true" tabindex="-1"></a>    insurance,</span>
-<span id="cb41-35"><a href="#cb41-35" aria-hidden="true" tabindex="-1"></a>    language,</span>
-<span id="cb41-36"><a href="#cb41-36" aria-hidden="true" tabindex="-1"></a>    marital_status,</span>
-<span id="cb41-37"><a href="#cb41-37" aria-hidden="true" tabindex="-1"></a>    race,</span>
-<span id="cb41-38"><a href="#cb41-38" aria-hidden="true" tabindex="-1"></a>    hospital_expire_flag,</span>
-<span id="cb41-39"><a href="#cb41-39" aria-hidden="true" tabindex="-1"></a>    gender,</span>
-<span id="cb41-40"><a href="#cb41-40" aria-hidden="true" tabindex="-1"></a>    dod,</span>
-<span id="cb41-41"><a href="#cb41-41" aria-hidden="true" tabindex="-1"></a>    chloride,</span>
-<span id="cb41-42"><a href="#cb41-42" aria-hidden="true" tabindex="-1"></a>    creatinine,</span>
-<span id="cb41-43"><a href="#cb41-43" aria-hidden="true" tabindex="-1"></a>    sodium,</span>
-<span id="cb41-44"><a href="#cb41-44" aria-hidden="true" tabindex="-1"></a>    potassium,</span>
-<span id="cb41-45"><a href="#cb41-45" aria-hidden="true" tabindex="-1"></a>    glucose,</span>
-<span id="cb41-46"><a href="#cb41-46" aria-hidden="true" tabindex="-1"></a>    hematocrit,</span>
-<span id="cb41-47"><a href="#cb41-47" aria-hidden="true" tabindex="-1"></a>    wbc,</span>
-<span id="cb41-48"><a href="#cb41-48" aria-hidden="true" tabindex="-1"></a>    bicarbonate,</span>
-<span id="cb41-49"><a href="#cb41-49" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">non invasive blood pressure systolic</span><span class="st">`</span>,</span>
-<span id="cb41-50"><a href="#cb41-50" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">non invasive blood pressure diastolic</span><span class="st">`</span>,</span>
-<span id="cb41-51"><a href="#cb41-51" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">respiratory rate</span><span class="st">`</span>,</span>
-<span id="cb41-52"><a href="#cb41-52" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">temperature fahrenheit</span><span class="st">`</span>,</span>
-<span id="cb41-53"><a href="#cb41-53" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">heart rate</span><span class="st">`</span>,</span>
-<span id="cb41-54"><a href="#cb41-54" aria-hidden="true" tabindex="-1"></a>    anchor_age,</span>
-<span id="cb41-55"><a href="#cb41-55" aria-hidden="true" tabindex="-1"></a>    los_long</span>
-<span id="cb41-56"><a href="#cb41-56" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb41-57"><a href="#cb41-57" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb41-58"><a href="#cb41-58" aria-hidden="true" tabindex="-1"></a>final_tbl <span class="ot">&lt;-</span> mimic_icu_cohort_clean <span class="sc">%&gt;%</span></span>
-<span id="cb41-59"><a href="#cb41-59" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tbl_summary</span>(</span>
-<span id="cb41-60"><a href="#cb41-60" aria-hidden="true" tabindex="-1"></a>    <span class="at">by =</span> los_long,</span>
-<span id="cb41-61"><a href="#cb41-61" aria-hidden="true" tabindex="-1"></a>    <span class="at">missing =</span> <span class="st">&quot;ifany&quot;</span>,  </span>
-<span id="cb41-62"><a href="#cb41-62" aria-hidden="true" tabindex="-1"></a>    <span class="at">missing_text =</span> <span class="st">&quot;Unknown&quot;</span>,</span>
-<span id="cb41-63"><a href="#cb41-63" aria-hidden="true" tabindex="-1"></a>    <span class="at">statistic =</span> <span class="fu">list</span>(</span>
-<span id="cb41-64"><a href="#cb41-64" aria-hidden="true" tabindex="-1"></a>      <span class="fu">all_continuous</span>() <span class="sc">~</span> <span class="st">&quot;{median} ({p25}, {p75})&quot;</span>,</span>
-<span id="cb41-65"><a href="#cb41-65" aria-hidden="true" tabindex="-1"></a>      <span class="fu">all_categorical</span>() <span class="sc">~</span> <span class="st">&quot;{n} ({p}%)&quot;</span></span>
-<span id="cb41-66"><a href="#cb41-66" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb41-67"><a href="#cb41-67" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
-<span id="cb41-68"><a href="#cb41-68" aria-hidden="true" tabindex="-1"></a>  <span class="fu">modify_header</span>(<span class="at">label =</span> <span class="st">&quot;**Characteristic**&quot;</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb41-69"><a href="#cb41-69" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bold_labels</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>mimic_icu_cohort_gtsummary <span class="ot">&lt;-</span> mimic_icu_cohort <span class="sc">%&gt;%</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">first_careunit      =</span> <span class="fu">fct_lump_n</span>(first_careunit, <span class="at">n =</span> <span class="dv">4</span>, <span class="at">other_level =</span> <span class="st">&quot;Other&quot;</span>),</span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">last_careunit       =</span> <span class="fu">fct_lump_n</span>(last_careunit,  <span class="at">n =</span> <span class="dv">4</span>, <span class="at">other_level =</span> <span class="st">&quot;Other&quot;</span>),</span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">admission_type      =</span> <span class="fu">fct_lump_n</span>(admission_type, <span class="at">n =</span> <span class="dv">4</span>, <span class="at">other_level =</span> <span class="st">&quot;Other&quot;</span>),</span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">admission_location  =</span> <span class="fu">fct_lump_n</span>(admission_location, <span class="at">n =</span> <span class="dv">4</span>, <span class="at">other_level =</span> <span class="st">&quot;Other&quot;</span>),</span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">discharge_location  =</span> <span class="fu">fct_lump_n</span>(discharge_location, <span class="at">n =</span> <span class="dv">4</span>, <span class="at">other_level =</span> <span class="st">&quot;Other&quot;</span>),</span>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">language =</span> language,</span>
+<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">race =</span> <span class="fu">case_when</span>(</span>
+<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a>      <span class="fu">str_detect</span>(race, <span class="st">&quot;ASIAN&quot;</span>) <span class="sc">~</span> <span class="st">&quot;ASIAN&quot;</span>,</span>
+<span id="cb42-11"><a href="#cb42-11" aria-hidden="true" tabindex="-1"></a>      <span class="fu">str_detect</span>(race, <span class="st">&quot;BLACK&quot;</span>) <span class="sc">~</span> <span class="st">&quot;BLACK&quot;</span>,</span>
+<span id="cb42-12"><a href="#cb42-12" aria-hidden="true" tabindex="-1"></a>      <span class="fu">str_detect</span>(race, <span class="st">&quot;HISPANIC&quot;</span>) <span class="sc">~</span> <span class="st">&quot;HISPANIC&quot;</span>,</span>
+<span id="cb42-13"><a href="#cb42-13" aria-hidden="true" tabindex="-1"></a>      <span class="fu">str_detect</span>(race, <span class="st">&quot;WHITE&quot;</span>) <span class="sc">~</span> <span class="st">&quot;WHITE&quot;</span>,</span>
+<span id="cb42-14"><a href="#cb42-14" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">&quot;Other&quot;</span></span>
+<span id="cb42-15"><a href="#cb42-15" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">%&gt;%</span></span>
+<span id="cb42-16"><a href="#cb42-16" aria-hidden="true" tabindex="-1"></a>      <span class="fu">factor</span>(<span class="at">levels =</span> <span class="fu">c</span>(<span class="st">&quot;ASIAN&quot;</span>, <span class="st">&quot;BLACK&quot;</span>, <span class="st">&quot;HISPANIC&quot;</span>, <span class="st">&quot;WHITE&quot;</span>, <span class="st">&quot;Other&quot;</span>)),</span>
+<span id="cb42-17"><a href="#cb42-17" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb42-18"><a href="#cb42-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">los_long =</span> (los <span class="sc">&gt;=</span> <span class="dv">2</span>),</span>
+<span id="cb42-19"><a href="#cb42-19" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb42-20"><a href="#cb42-20" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">non invasive blood pressure systolic</span><span class="st">`</span>  <span class="ot">=</span> <span class="fu">as.numeric</span>(<span class="st">`</span><span class="at">non invasive blood pressure systolic</span><span class="st">`</span>),</span>
+<span id="cb42-21"><a href="#cb42-21" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">non invasive blood pressure diastolic</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">as.numeric</span>(<span class="st">`</span><span class="at">non invasive blood pressure diastolic</span><span class="st">`</span>),</span>
+<span id="cb42-22"><a href="#cb42-22" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">respiratory rate</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">as.numeric</span>(<span class="st">`</span><span class="at">respiratory rate</span><span class="st">`</span>),</span>
+<span id="cb42-23"><a href="#cb42-23" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">temperature fahrenheit</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">as.numeric</span>(<span class="st">`</span><span class="at">temperature fahrenheit</span><span class="st">`</span>),</span>
+<span id="cb42-24"><a href="#cb42-24" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">heart rate</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">as.numeric</span>(<span class="st">`</span><span class="at">heart rate</span><span class="st">`</span>)</span>
+<span id="cb42-25"><a href="#cb42-25" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb42-26"><a href="#cb42-26" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb42-27"><a href="#cb42-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(</span>
+<span id="cb42-28"><a href="#cb42-28" aria-hidden="true" tabindex="-1"></a>    first_careunit,</span>
+<span id="cb42-29"><a href="#cb42-29" aria-hidden="true" tabindex="-1"></a>    last_careunit,</span>
+<span id="cb42-30"><a href="#cb42-30" aria-hidden="true" tabindex="-1"></a>    los,</span>
+<span id="cb42-31"><a href="#cb42-31" aria-hidden="true" tabindex="-1"></a>    admission_type,</span>
+<span id="cb42-32"><a href="#cb42-32" aria-hidden="true" tabindex="-1"></a>    admission_location,</span>
+<span id="cb42-33"><a href="#cb42-33" aria-hidden="true" tabindex="-1"></a>    discharge_location,</span>
+<span id="cb42-34"><a href="#cb42-34" aria-hidden="true" tabindex="-1"></a>    insurance,</span>
+<span id="cb42-35"><a href="#cb42-35" aria-hidden="true" tabindex="-1"></a>    language,</span>
+<span id="cb42-36"><a href="#cb42-36" aria-hidden="true" tabindex="-1"></a>    marital_status,</span>
+<span id="cb42-37"><a href="#cb42-37" aria-hidden="true" tabindex="-1"></a>    race,</span>
+<span id="cb42-38"><a href="#cb42-38" aria-hidden="true" tabindex="-1"></a>    hospital_expire_flag,</span>
+<span id="cb42-39"><a href="#cb42-39" aria-hidden="true" tabindex="-1"></a>    gender,</span>
+<span id="cb42-40"><a href="#cb42-40" aria-hidden="true" tabindex="-1"></a>    dod,</span>
+<span id="cb42-41"><a href="#cb42-41" aria-hidden="true" tabindex="-1"></a>    chloride,</span>
+<span id="cb42-42"><a href="#cb42-42" aria-hidden="true" tabindex="-1"></a>    creatinine,</span>
+<span id="cb42-43"><a href="#cb42-43" aria-hidden="true" tabindex="-1"></a>    sodium,</span>
+<span id="cb42-44"><a href="#cb42-44" aria-hidden="true" tabindex="-1"></a>    potassium,</span>
+<span id="cb42-45"><a href="#cb42-45" aria-hidden="true" tabindex="-1"></a>    glucose,</span>
+<span id="cb42-46"><a href="#cb42-46" aria-hidden="true" tabindex="-1"></a>    hematocrit,</span>
+<span id="cb42-47"><a href="#cb42-47" aria-hidden="true" tabindex="-1"></a>    wbc,</span>
+<span id="cb42-48"><a href="#cb42-48" aria-hidden="true" tabindex="-1"></a>    bicarbonate,</span>
+<span id="cb42-49"><a href="#cb42-49" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">non invasive blood pressure systolic</span><span class="st">`</span>,</span>
+<span id="cb42-50"><a href="#cb42-50" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">non invasive blood pressure diastolic</span><span class="st">`</span>,</span>
+<span id="cb42-51"><a href="#cb42-51" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">respiratory rate</span><span class="st">`</span>,</span>
+<span id="cb42-52"><a href="#cb42-52" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">temperature fahrenheit</span><span class="st">`</span>,</span>
+<span id="cb42-53"><a href="#cb42-53" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">heart rate</span><span class="st">`</span>,</span>
+<span id="cb42-54"><a href="#cb42-54" aria-hidden="true" tabindex="-1"></a>    anchor_age,</span>
+<span id="cb42-55"><a href="#cb42-55" aria-hidden="true" tabindex="-1"></a>    los_long</span>
+<span id="cb42-56"><a href="#cb42-56" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb42-57"><a href="#cb42-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-58"><a href="#cb42-58" aria-hidden="true" tabindex="-1"></a>final_tbl <span class="ot">&lt;-</span> mimic_icu_cohort_gtsummary <span class="sc">%&gt;%</span></span>
+<span id="cb42-59"><a href="#cb42-59" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tbl_summary</span>(</span>
+<span id="cb42-60"><a href="#cb42-60" aria-hidden="true" tabindex="-1"></a>    <span class="at">by =</span> los_long,</span>
+<span id="cb42-61"><a href="#cb42-61" aria-hidden="true" tabindex="-1"></a>    <span class="at">missing =</span> <span class="st">&quot;ifany&quot;</span>,  </span>
+<span id="cb42-62"><a href="#cb42-62" aria-hidden="true" tabindex="-1"></a>    <span class="at">missing_text =</span> <span class="st">&quot;Unknown&quot;</span>,</span>
+<span id="cb42-63"><a href="#cb42-63" aria-hidden="true" tabindex="-1"></a>    <span class="at">statistic =</span> <span class="fu">list</span>(</span>
+<span id="cb42-64"><a href="#cb42-64" aria-hidden="true" tabindex="-1"></a>      <span class="fu">all_continuous</span>() <span class="sc">~</span> <span class="st">&quot;{median} ({p25}, {p75})&quot;</span>,</span>
+<span id="cb42-65"><a href="#cb42-65" aria-hidden="true" tabindex="-1"></a>      <span class="fu">all_categorical</span>() <span class="sc">~</span> <span class="st">&quot;{n} ({p}%)&quot;</span></span>
+<span id="cb42-66"><a href="#cb42-66" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb42-67"><a href="#cb42-67" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb42-68"><a href="#cb42-68" aria-hidden="true" tabindex="-1"></a>  <span class="fu">modify_header</span>(<span class="at">label =</span> <span class="st">&quot;**Characteristic**&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb42-69"><a href="#cb42-69" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bold_labels</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>14 missing rows in the &quot;los_long&quot; column have been removed.
 The following errors were returned during `modify_header()`:
 ✖ For variable `dod` (`los_long = FALSE`) and &quot;p75&quot; statistic: * not defined
   for &quot;Date&quot; objects</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>final_tbl</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>final_tbl</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<div id="wfxyxageyt" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#wfxyxageyt table {
+<div id="shgyaidpft" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#shgyaidpft table {
 font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 -webkit-font-smoothing: antialiased;
 -moz-osx-font-smoothing: grayscale;
 }
-#wfxyxageyt thead, #wfxyxageyt tbody, #wfxyxageyt tfoot, #wfxyxageyt tr, #wfxyxageyt td, #wfxyxageyt th {
+#shgyaidpft thead, #shgyaidpft tbody, #shgyaidpft tfoot, #shgyaidpft tr, #shgyaidpft td, #shgyaidpft th {
 border-style: none;
 }
-#wfxyxageyt p {
+#shgyaidpft p {
 margin: 0;
 padding: 0;
 }
-#wfxyxageyt .gt_table {
+#shgyaidpft .gt_table {
 display: table;
 border-collapse: collapse;
 line-height: normal;
@@ -4040,11 +4039,11 @@ border-left-style: none;
 border-left-width: 2px;
 border-left-color: #D3D3D3;
 }
-#wfxyxageyt .gt_caption {
+#shgyaidpft .gt_caption {
 padding-top: 4px;
 padding-bottom: 4px;
 }
-#wfxyxageyt .gt_title {
+#shgyaidpft .gt_title {
 color: #333333;
 font-size: 125%;
 font-weight: initial;
@@ -4055,7 +4054,7 @@ padding-right: 5px;
 border-bottom-color: #FFFFFF;
 border-bottom-width: 0;
 }
-#wfxyxageyt .gt_subtitle {
+#shgyaidpft .gt_subtitle {
 color: #333333;
 font-size: 85%;
 font-weight: initial;
@@ -4066,7 +4065,7 @@ padding-right: 5px;
 border-top-color: #FFFFFF;
 border-top-width: 0;
 }
-#wfxyxageyt .gt_heading {
+#shgyaidpft .gt_heading {
 background-color: #FFFFFF;
 text-align: center;
 border-bottom-color: #FFFFFF;
@@ -4077,12 +4076,12 @@ border-right-style: none;
 border-right-width: 1px;
 border-right-color: #D3D3D3;
 }
-#wfxyxageyt .gt_bottom_border {
+#shgyaidpft .gt_bottom_border {
 border-bottom-style: solid;
 border-bottom-width: 2px;
 border-bottom-color: #D3D3D3;
 }
-#wfxyxageyt .gt_col_headings {
+#shgyaidpft .gt_col_headings {
 border-top-style: solid;
 border-top-width: 2px;
 border-top-color: #D3D3D3;
@@ -4096,7 +4095,7 @@ border-right-style: none;
 border-right-width: 1px;
 border-right-color: #D3D3D3;
 }
-#wfxyxageyt .gt_col_heading {
+#shgyaidpft .gt_col_heading {
 color: #333333;
 background-color: #FFFFFF;
 font-size: 100%;
@@ -4115,7 +4114,7 @@ padding-left: 5px;
 padding-right: 5px;
 overflow-x: hidden;
 }
-#wfxyxageyt .gt_column_spanner_outer {
+#shgyaidpft .gt_column_spanner_outer {
 color: #333333;
 background-color: #FFFFFF;
 font-size: 100%;
@@ -4126,13 +4125,13 @@ padding-bottom: 0;
 padding-left: 4px;
 padding-right: 4px;
 }
-#wfxyxageyt .gt_column_spanner_outer:first-child {
+#shgyaidpft .gt_column_spanner_outer:first-child {
 padding-left: 0;
 }
-#wfxyxageyt .gt_column_spanner_outer:last-child {
+#shgyaidpft .gt_column_spanner_outer:last-child {
 padding-right: 0;
 }
-#wfxyxageyt .gt_column_spanner {
+#shgyaidpft .gt_column_spanner {
 border-bottom-style: solid;
 border-bottom-width: 2px;
 border-bottom-color: #D3D3D3;
@@ -4143,10 +4142,10 @@ overflow-x: hidden;
 display: inline-block;
 width: 100%;
 }
-#wfxyxageyt .gt_spanner_row {
+#shgyaidpft .gt_spanner_row {
 border-bottom-style: hidden;
 }
-#wfxyxageyt .gt_group_heading {
+#shgyaidpft .gt_group_heading {
 padding-top: 8px;
 padding-bottom: 8px;
 padding-left: 5px;
@@ -4171,7 +4170,7 @@ border-right-color: #D3D3D3;
 vertical-align: middle;
 text-align: left;
 }
-#wfxyxageyt .gt_empty_group_heading {
+#shgyaidpft .gt_empty_group_heading {
 padding: 0.5px;
 color: #333333;
 background-color: #FFFFFF;
@@ -4185,13 +4184,13 @@ border-bottom-width: 2px;
 border-bottom-color: #D3D3D3;
 vertical-align: middle;
 }
-#wfxyxageyt .gt_from_md > :first-child {
+#shgyaidpft .gt_from_md > :first-child {
 margin-top: 0;
 }
-#wfxyxageyt .gt_from_md > :last-child {
+#shgyaidpft .gt_from_md > :last-child {
 margin-bottom: 0;
 }
-#wfxyxageyt .gt_row {
+#shgyaidpft .gt_row {
 padding-top: 8px;
 padding-bottom: 8px;
 padding-left: 5px;
@@ -4209,7 +4208,7 @@ border-right-color: #D3D3D3;
 vertical-align: middle;
 overflow-x: hidden;
 }
-#wfxyxageyt .gt_stub {
+#shgyaidpft .gt_stub {
 color: #333333;
 background-color: #FFFFFF;
 font-size: 100%;
@@ -4221,7 +4220,7 @@ border-right-color: #D3D3D3;
 padding-left: 5px;
 padding-right: 5px;
 }
-#wfxyxageyt .gt_stub_row_group {
+#shgyaidpft .gt_stub_row_group {
 color: #333333;
 background-color: #FFFFFF;
 font-size: 100%;
@@ -4234,13 +4233,13 @@ padding-left: 5px;
 padding-right: 5px;
 vertical-align: top;
 }
-#wfxyxageyt .gt_row_group_first td {
+#shgyaidpft .gt_row_group_first td {
 border-top-width: 2px;
 }
-#wfxyxageyt .gt_row_group_first th {
+#shgyaidpft .gt_row_group_first th {
 border-top-width: 2px;
 }
-#wfxyxageyt .gt_summary_row {
+#shgyaidpft .gt_summary_row {
 color: #333333;
 background-color: #FFFFFF;
 text-transform: inherit;
@@ -4249,14 +4248,14 @@ padding-bottom: 8px;
 padding-left: 5px;
 padding-right: 5px;
 }
-#wfxyxageyt .gt_first_summary_row {
+#shgyaidpft .gt_first_summary_row {
 border-top-style: solid;
 border-top-color: #D3D3D3;
 }
-#wfxyxageyt .gt_first_summary_row.thick {
+#shgyaidpft .gt_first_summary_row.thick {
 border-top-width: 2px;
 }
-#wfxyxageyt .gt_last_summary_row {
+#shgyaidpft .gt_last_summary_row {
 padding-top: 8px;
 padding-bottom: 8px;
 padding-left: 5px;
@@ -4265,7 +4264,7 @@ border-bottom-style: solid;
 border-bottom-width: 2px;
 border-bottom-color: #D3D3D3;
 }
-#wfxyxageyt .gt_grand_summary_row {
+#shgyaidpft .gt_grand_summary_row {
 color: #333333;
 background-color: #FFFFFF;
 text-transform: inherit;
@@ -4274,7 +4273,7 @@ padding-bottom: 8px;
 padding-left: 5px;
 padding-right: 5px;
 }
-#wfxyxageyt .gt_first_grand_summary_row {
+#shgyaidpft .gt_first_grand_summary_row {
 padding-top: 8px;
 padding-bottom: 8px;
 padding-left: 5px;
@@ -4283,7 +4282,7 @@ border-top-style: double;
 border-top-width: 6px;
 border-top-color: #D3D3D3;
 }
-#wfxyxageyt .gt_last_grand_summary_row_top {
+#shgyaidpft .gt_last_grand_summary_row_top {
 padding-top: 8px;
 padding-bottom: 8px;
 padding-left: 5px;
@@ -4292,10 +4291,10 @@ border-bottom-style: double;
 border-bottom-width: 6px;
 border-bottom-color: #D3D3D3;
 }
-#wfxyxageyt .gt_striped {
+#shgyaidpft .gt_striped {
 background-color: rgba(128, 128, 128, 0.05);
 }
-#wfxyxageyt .gt_table_body {
+#shgyaidpft .gt_table_body {
 border-top-style: solid;
 border-top-width: 2px;
 border-top-color: #D3D3D3;
@@ -4303,7 +4302,7 @@ border-bottom-style: solid;
 border-bottom-width: 2px;
 border-bottom-color: #D3D3D3;
 }
-#wfxyxageyt .gt_footnotes {
+#shgyaidpft .gt_footnotes {
 color: #333333;
 background-color: #FFFFFF;
 border-bottom-style: none;
@@ -4316,7 +4315,7 @@ border-right-style: none;
 border-right-width: 2px;
 border-right-color: #D3D3D3;
 }
-#wfxyxageyt .gt_footnote {
+#shgyaidpft .gt_footnote {
 margin: 0px;
 font-size: 90%;
 padding-top: 4px;
@@ -4324,7 +4323,7 @@ padding-bottom: 4px;
 padding-left: 5px;
 padding-right: 5px;
 }
-#wfxyxageyt .gt_sourcenotes {
+#shgyaidpft .gt_sourcenotes {
 color: #333333;
 background-color: #FFFFFF;
 border-bottom-style: none;
@@ -4337,64 +4336,64 @@ border-right-style: none;
 border-right-width: 2px;
 border-right-color: #D3D3D3;
 }
-#wfxyxageyt .gt_sourcenote {
+#shgyaidpft .gt_sourcenote {
 font-size: 90%;
 padding-top: 4px;
 padding-bottom: 4px;
 padding-left: 5px;
 padding-right: 5px;
 }
-#wfxyxageyt .gt_left {
+#shgyaidpft .gt_left {
 text-align: left;
 }
-#wfxyxageyt .gt_center {
+#shgyaidpft .gt_center {
 text-align: center;
 }
-#wfxyxageyt .gt_right {
+#shgyaidpft .gt_right {
 text-align: right;
 font-variant-numeric: tabular-nums;
 }
-#wfxyxageyt .gt_font_normal {
+#shgyaidpft .gt_font_normal {
 font-weight: normal;
 }
-#wfxyxageyt .gt_font_bold {
+#shgyaidpft .gt_font_bold {
 font-weight: bold;
 }
-#wfxyxageyt .gt_font_italic {
+#shgyaidpft .gt_font_italic {
 font-style: italic;
 }
-#wfxyxageyt .gt_super {
+#shgyaidpft .gt_super {
 font-size: 65%;
 }
-#wfxyxageyt .gt_footnote_marks {
+#shgyaidpft .gt_footnote_marks {
 font-size: 75%;
 vertical-align: 0.4em;
 position: initial;
 }
-#wfxyxageyt .gt_asterisk {
+#shgyaidpft .gt_asterisk {
 font-size: 100%;
 vertical-align: 0;
 }
-#wfxyxageyt .gt_indent_1 {
+#shgyaidpft .gt_indent_1 {
 text-indent: 5px;
 }
-#wfxyxageyt .gt_indent_2 {
+#shgyaidpft .gt_indent_2 {
 text-indent: 10px;
 }
-#wfxyxageyt .gt_indent_3 {
+#shgyaidpft .gt_indent_3 {
 text-indent: 15px;
 }
-#wfxyxageyt .gt_indent_4 {
+#shgyaidpft .gt_indent_4 {
 text-indent: 20px;
 }
-#wfxyxageyt .gt_indent_5 {
+#shgyaidpft .gt_indent_5 {
 text-indent: 25px;
 }
-#wfxyxageyt .katex-display {
+#shgyaidpft .katex-display {
 display: inline-flex !important;
 margin-bottom: 0.75em !important;
 }
-#wfxyxageyt div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+#shgyaidpft div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
 height: 0px !important;
 }
 </style>
@@ -5004,20 +5003,20 @@ height: 0px !important;
 <h3 class="anchored" data-anchor-id="q1.9-save-the-final-tibble">Q1.9 Save the final tibble</h3>
 <p>Save the final tibble to an R data file <code>mimic_icu_cohort.rds</code> in the <code>mimiciv_shiny</code> folder.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="co"># make a directory mimiciv_shiny</span></span>
-<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">dir.exists</span>(<span class="st">&quot;mimiciv_shiny&quot;</span>)) {</span>
-<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dir.create</span>(<span class="st">&quot;mimiciv_shiny&quot;</span>)</span>
-<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a><span class="co"># save the final tibble</span></span>
-<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>mimic_icu_cohort <span class="sc">|&gt;</span></span>
-<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">write_rds</span>(<span class="st">&quot;mimiciv_shiny/mimic_icu_cohort.rds&quot;</span>, <span class="at">compress =</span> <span class="st">&quot;gz&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="co"># make a directory mimiciv_shiny</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">dir.exists</span>(<span class="st">&quot;mimiciv_shiny&quot;</span>)) {</span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dir.create</span>(<span class="st">&quot;mimiciv_shiny&quot;</span>)</span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a><span class="co"># save the final tibble</span></span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>mimic_icu_cohort <span class="sc">|&gt;</span></span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">write_rds</span>(<span class="st">&quot;mimiciv_shiny/mimic_icu_cohort.rds&quot;</span>, <span class="at">compress =</span> <span class="st">&quot;gz&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Close database connection and clear workspace.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">exists</span>(<span class="st">&quot;con_bq&quot;</span>)) {</span>
-<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dbDisconnect</span>(con_bq)</span>
-<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(<span class="at">list =</span> <span class="fu">ls</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">exists</span>(<span class="st">&quot;con_bq&quot;</span>)) {</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dbDisconnect</span>(con_bq)</span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(<span class="at">list =</span> <span class="fu">ls</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Although it is not a good practice to add big data files to Git, for grading purpose, please add <code>mimic_icu_cohort.rds</code> to your Git repository.</p>
 </section>

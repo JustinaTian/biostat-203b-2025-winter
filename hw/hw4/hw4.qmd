@@ -202,12 +202,15 @@ mimic_icu_cohort <- icustays_tble %>%
   left_join(admissions_tble, by = c("subject_id", "hadm_id")) %>%
   left_join(patients_tble, by = "subject_id") %>%
   # keep adults only (age >= 18), using MIMIC-IV's anchor_age
-  filter(anchor_age >= 18) %>%
+  mutate(ageintime = anchor_age + (year(intime) - anchor_year))%>%
+  filter(ageintime >= 18) %>%
   left_join(labevents_tble, by = c("subject_id", "stay_id")) %>%
   left_join(chartevents_tble, by = c("subject_id", "stay_id")) %>%
+  select(-intime_x) %>%
+  rename(intime = intime_y) %>%
   collect() %>%
   arrange(subject_id, hadm_id, stay_id) %>%
-  print(width = Inf)
+  print(mimic_icu_cohort, width = Inf)
 ```
 
 ### Q1.8 Preprocessing
@@ -219,7 +222,7 @@ Hint: Below is a numerical summary of my tibble after preprocessing:
 <iframe width=95% height="500" src="./mimic_icu_cohort_gtsummary.html"></iframe>
 
 ```{r}
-mimic_icu_cohort_clean <- mimic_icu_cohort %>%
+mimic_icu_cohort_gtsummary <- mimic_icu_cohort %>%
   mutate(
     first_careunit      = fct_lump_n(first_careunit, n = 4, other_level = "Other"),
     last_careunit       = fct_lump_n(last_careunit,  n = 4, other_level = "Other"),
@@ -276,7 +279,7 @@ mimic_icu_cohort_clean <- mimic_icu_cohort %>%
     los_long
   )
 
-final_tbl <- mimic_icu_cohort_clean %>%
+final_tbl <- mimic_icu_cohort_gtsummary %>%
   tbl_summary(
     by = los_long,
     missing = "ifany",  
@@ -315,4 +318,3 @@ Although it is not a good practice to add big data files to Git, for grading pur
 ## Q2. Shiny app
 
 Develop a Shiny app for exploring the ICU cohort data created in Q1. The app should reside in the `mimiciv_shiny` folder. The app should contain at least two tabs. One tab provides easy access to the graphical and numerical summaries of variables (demographics, lab measurements, vitals) in the ICU cohort, using the `mimic_icu_cohort.rds` you curated in Q1. The other tab allows user to choose a specific patient in the cohort and display the patient's ADT and ICU stay information as we did in Q1 of HW3, by dynamically retrieving the patient's ADT and ICU stay information from BigQuery database. Again, do **not** ever add the BigQuery token to your Git repository. If you do so, you will lose 50 points.
-
