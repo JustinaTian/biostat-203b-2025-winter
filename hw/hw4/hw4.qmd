@@ -147,6 +147,8 @@ Connect to `chartevents` table and retrieve a subset that only contain subjects 
 # # TODO
 chartevents_tble <- tbl(con_bq, "chartevents") %>%
   select(subject_id, stay_id, itemid, storetime, value) %>%
+  mutate(
+    value = as.numeric(value)) %>%
   semi_join(
     tbl(con_bq, "d_items") %>%
       filter(itemid %in% c(220045, 220179, 220180, 223761, 220210)) %>%
@@ -160,10 +162,10 @@ chartevents_tble <- tbl(con_bq, "chartevents") %>%
   ) %>%
   filter(storetime >= intime, storetime <= outtime) %>%
   group_by(subject_id, stay_id, itemid) %>%
-  slice_min(storetime, n = 1) %>%
+  slice_min(order_by = storetime, with_ties = TRUE) %>%
   select(-storetime, -intime, -outtime) %>%
   ungroup() %>%
-  pivot_wider(names_from = itemid, values_from = value) %>%
+  pivot_wider(names_from = itemid, values_from = value, values_fn = mean) %>%
   rename(
     `heart rate` = `220045`,
     `non invasive blood pressure systolic` = `220179`,
@@ -181,6 +183,11 @@ chartevents_tble <- tbl(con_bq, "chartevents") %>%
     `respiratory rate`,
     `temperature fahrenheit`
   ) %>%
+  mutate(
+  `heart rate` = round(`heart rate`, 1),
+  `non invasive blood pressure systolic` = round(`non invasive blood pressure systolic`, 1),
+  `non invasive blood pressure diastolic` = round(`non invasive blood pressure diastolic`, 1),
+  `respiratory rate` = round(`respiratory rate`, 1)) %>%
   show_query() %>%
   print(width = Inf)
 ```
@@ -191,7 +198,16 @@ This step is similar to Q7 of HW3. Using _one_ chain of pipes `|>` to perform fo
 
 ```{r}
 # # TODO
-# mimic_icu_cohort <- 
+mimic_icu_cohort <- icustays_tble %>%
+  left_join(admissions_tble, by = c("subject_id", "hadm_id")) %>%
+  left_join(patients_tble, by = "subject_id") %>%
+  # keep adults only (age >= 18), using MIMIC-IV's anchor_age
+  filter(anchor_age >= 18) %>%
+  left_join(labevents_tble, by = c("subject_id", "stay_id")) %>%
+  left_join(chartevents_tble, by = c("subject_id", "stay_id")) %>%
+  collect() %>%
+  arrange(subject_id, hadm_id, stay_id) %>%
+  print(width = Inf)
 ```
 
 ### Q1.8 Preprocessing
@@ -202,6 +218,79 @@ Hint: Below is a numerical summary of my tibble after preprocessing:
 
 <iframe width=95% height="500" src="./mimic_icu_cohort_gtsummary.html"></iframe>
 
+```{r}
+mimic_icu_cohort_clean <- mimic_icu_cohort %>%
+  mutate(
+    first_careunit      = fct_lump_n(first_careunit, n = 4, other_level = "Other"),
+    last_careunit       = fct_lump_n(last_careunit,  n = 4, other_level = "Other"),
+    admission_type      = fct_lump_n(admission_type, n = 4, other_level = "Other"),
+    admission_location  = fct_lump_n(admission_location, n = 4, other_level = "Other"),
+    discharge_location  = fct_lump_n(discharge_location, n = 4, other_level = "Other"),
+    language = language,
+    race = case_when(
+      str_detect(race, "ASIAN") ~ "ASIAN",
+      str_detect(race, "BLACK") ~ "BLACK",
+      str_detect(race, "HISPANIC") ~ "HISPANIC",
+      str_detect(race, "WHITE") ~ "WHITE",
+      TRUE ~ "Other"
+    ) %>%
+      factor(levels = c("ASIAN", "BLACK", "HISPANIC", "WHITE", "Other")),
+    
+    los_long = (los >= 2),
+    
+    `non invasive blood pressure systolic`  = as.numeric(`non invasive blood pressure systolic`),
+    `non invasive blood pressure diastolic` = as.numeric(`non invasive blood pressure diastolic`),
+    `respiratory rate` = as.numeric(`respiratory rate`),
+    `temperature fahrenheit` = as.numeric(`temperature fahrenheit`),
+    `heart rate` = as.numeric(`heart rate`)
+  ) %>%
+  
+  select(
+    first_careunit,
+    last_careunit,
+    los,
+    admission_type,
+    admission_location,
+    discharge_location,
+    insurance,
+    language,
+    marital_status,
+    race,
+    hospital_expire_flag,
+    gender,
+    dod,
+    chloride,
+    creatinine,
+    sodium,
+    potassium,
+    glucose,
+    hematocrit,
+    wbc,
+    bicarbonate,
+    `non invasive blood pressure systolic`,
+    `non invasive blood pressure diastolic`,
+    `respiratory rate`,
+    `temperature fahrenheit`,
+    `heart rate`,
+    anchor_age,
+    los_long
+  )
+
+final_tbl <- mimic_icu_cohort_clean %>%
+  tbl_summary(
+    by = los_long,
+    missing = "ifany",  
+    missing_text = "Unknown",
+    statistic = list(
+      all_continuous() ~ "{median} ({p25}, {p75})",
+      all_categorical() ~ "{n} ({p}%)"
+    )
+  ) %>%
+  modify_header(label = "**Characteristic**") %>%
+  bold_labels()
+
+final_tbl
+```
 ### Q1.9 Save the final tibble
 
 Save the final tibble to an R data file `mimic_icu_cohort.rds` in the `mimiciv_shiny` folder.
