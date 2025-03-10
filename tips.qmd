@@ -1,0 +1,11 @@
+！以下是你可能需要转换文件的时候需要的，如果要用把里面的path改成需要转换的文件的path就可以：）
+```{bash}
+# 解压的方法
+#| eval: false
+gunzip -c ~/mimic/icu/chartevents.csv.gz > ~/203b/hw/hw2/chartevents.csv
+```
+```{r}
+# Write dataset from CSV to Parquet format （将csv转换成pq的方法）
+write_dataset(open_dataset("~/203b/hw/hw2/chartevents.csv", format = "csv"), 
+              path = "chartevents_parquet", format = "parquet")
+```

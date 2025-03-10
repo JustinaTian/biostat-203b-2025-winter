@@ -58,5 +58,26 @@ hw1/test1.txt
 hw1/test2.txt
 hw/hw2/labevents.csv
 hw/hw2/labevents_filtered.csv.gz
+<<<<<<< HEAD
 hw/hw2/labevents_parquet/
+>>>>>>> main
+=======
+
+Untitled.qmd
+
+.RDataTmp1
+
+tips.qmd
+
+backup-repo.git/
+chartevents.p
+hw/hw2/chartevents_parquet/
+hw/hw2/labevents_pq/
+hw/hw3/chartevents_filtered.csv
+hw/hw3/grade_hw3.md
+hw/hw3/labevents_pq/
+install-tl-20250309/
+update-tlmgr-latest.sh
+=======
+>>>>>>> 29c879bc4ddf42089c1fe2d340b6d7b2ca8f5ef3
 >>>>>>> main
