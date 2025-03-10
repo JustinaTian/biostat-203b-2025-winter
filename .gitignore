@@ -62,4 +62,12 @@ Untitled.qmd
 
 tips.qmd
 
-.RDataTmp1
+backup-repo.git/
+chartevents.p
+hw/hw2/chartevents_parquet/
+hw/hw2/labevents_pq/
+hw/hw3/chartevents_filtered.csv
+hw/hw3/grade_hw3.md
+hw/hw3/labevents_pq/
+install-tl-20250309/
+update-tlmgr-latest.sh
