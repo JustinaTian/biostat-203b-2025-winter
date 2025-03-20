@@ -1,0 +1,430 @@
+---
+title: "Biostat 203B Homework 5"
+subtitle: Due Mar 20 @ 11:59PM
+author: "Jiaye Tian UID: 306541095"
+format:
+  html:
+    theme: cosmo
+    embed-resources: true
+    number-sections: false
+    toc: true
+    toc-depth: 4
+    toc-location: left
+    code-fold: false
+---
+
+## Predicting ICU duration
+
+Using the ICU cohort `mimiciv_icu_cohort.rds` you built in Homework 4, develop at least three machine learning approaches (logistic regression with enet regularization, random forest, boosting, SVM, MLP, etc) plus a model stacking approach for predicting whether a patient's ICU stay will be longer than 2 days. You should use the `los_long` variable as the outcome. You algorithms can use patient demographic information (gender, age at ICU `intime`, marital status, race), ICU admission information (first care unit), the last lab measurements before the ICU stay, and first vital measurements during ICU stay as features. You are welcome to use any feature engineering techniques you think are appropriate; but make sure to not use features that are not available at an ICU stay's `intime`. For instance, `last_careunit` cannot be used in your algorithms. 
+
+### 1. Data preprocessing and feature engineering.
+```{r}
+sessionInfo()
+```
+```{r}
+# Load libraries
+library(dplyr)
+library(rsample)
+library(gtsummary)
+library(GGally)
+library(tidyverse)
+library(tidymodels)
+```
+```{r}
+# Load the `mimic_icu_cohort` data.
+mimic_icu_cohort <- readRDS("~/203b/hw/hw4/mimiciv_shiny/mimic_icu_cohort.rds"
+                            ) |>
+  select(subject_id, hadm_id, stay_id,
+         gender, ageintime, marital_status, race, first_careunit, 
+         bicarbonate, 
+         chloride, 
+         creatinine, 
+         glucose, 
+         hematocrit, 
+         potassium, 
+         sodium, 
+         wbc, 
+         `heart rate`, 
+         `non invasive blood pressure systolic`, 
+         `non invasive blood pressure diastolic`, 
+         `respiratory rate`, 
+         `temperature fahrenheit`, 
+         los
+  ) |> 
+  mutate(marital_status = as.factor(marital_status), 
+         race = case_when(
+           str_detect(race, "ASIAN") ~ "ASIAN", 
+           str_detect(race, "BLACK") ~ "BLACK", 
+           str_detect(race, "HISPANIC") ~ "HISPANIC", 
+           str_detect(race, "WHITE") ~ "WHITE", 
+           TRUE ~ "Other" ) |>
+         factor(levels = c("ASIAN", "BLACK", "HISPANIC", "WHITE", "Other")), 
+         first_careunit = as.factor(first_careunit), 
+         gender = as.factor(gender), 
+         los_long = as.factor(los >= 2)) |>
+  select(- los) |>
+  print(width = Inf)
+
+# Numerical summaries stratified by the outcome `los_long`.
+mimic_icu_cohort |> tbl_summary(by = los_long)
+```
+
+### 2. Sorted stratified 50/50 split (seed 203)
+2. Partition data into 50% training set and 50% test set. Stratify partitioning according to `los_long`. For grading purpose, sort the data by `subject_id`, `hadm_id`, and `stay_id` and use the seed `203` for the initial data split. Below is the sample code.
+```{r}
+#| eval: true
+set.seed(203)
+
+# sort
+mimiciv_icu_cohort <- mimic_icu_cohort |>
+  arrange(subject_id, hadm_id, stay_id)
+
+full_data <- mimic_icu_cohort |> filter(!is.na(los_long))
+
+data_split <- initial_split(
+  mimiciv_icu_cohort, 
+  # stratify by los_long
+  strata = los_long, 
+  prop = 0.5
+  )
+
+data_split
+```
+```{r}
+train_data <- training(data_split) |>
+  filter(!is.na(los_long)) |> 
+  select(-subject_id, -hadm_id, -stay_id)
+
+dim(train_data)
+prop.table(table(train_data$los_long))
+```
+```{r}
+test_data <- testing(data_split) |>
+  filter(!is.na(los_long)) |> 
+  select(-subject_id, -hadm_id, -stay_id)
+
+dim(test_data)
+prop.table(table(test_data$los_long))
+```
+```{r}
+recipe <-
+  recipe(los_long ~ ., data = train_data) |> 
+  step_unknown(all_nominal_predictors()) |>
+  step_impute_median(`heart rate`) |>
+  step_impute_median(`non invasive blood pressure systolic`) |>
+  step_impute_median(`non invasive blood pressure diastolic`) |>
+  step_impute_median(`respiratory rate`) |>
+  step_impute_median(`temperature fahrenheit`) |>
+  step_mutate(across(c(bicarbonate, 
+                       chloride, 
+                       creatinine, 
+                       glucose, 
+                       potassium, 
+                       sodium, 
+                       hematocrit, 
+                       wbc),
+                     ~ if_else(is.na(.), 1, 0),
+                     .names = "{.col}_missing")) |> 
+  step_impute_median(c(bicarbonate, 
+                       chloride, 
+                       creatinine, 
+                       glucose, 
+                       potassium, 
+                       sodium, 
+                       hematocrit, 
+                       wbc)) |>
+  step_dummy(all_nominal_predictors()) |>
+  step_zv(all_numeric_predictors()) |>
+  step_normalize(all_numeric_predictors()) |> 
+  step_naomit(all_outcomes()) |>
+  step_naomit(all_predictors()) |>
+  print()
+```
+```{r}
+prepped_data <- recipe %>% 
+  prep(training = train_data) %>% 
+  bake(new_data = train_data)
+
+cat("预处理后的数据中 NA 数量：", sum(!complete.cases(prepped_data)), "\n")
+```
+
+### 3. Train and tune the models
+3. Train and tune the models using the training set.
+
+#### (1) Logit Regression Model
+```{r}
+# Load libraries
+library(glmnet)
+```
+```{r}
+logit_mod <-
+  logistic_reg(
+    penalty = tune(),
+    mixture = tune()) |>
+  set_engine("glmnet", standardize = FALSE) |> 
+  print()
+```
+```{r}
+logit_wf <- workflow() |>
+  add_recipe(recipe) |>
+  add_model(logit_mod) |>
+  print()
+```
+```{r}
+param_grid_logit <- grid_regular(
+  penalty(range = c(-2.8, -2.3)),
+  mixture(range = c(0.2, 0.3)),
+  levels = c(10, 10)
+)
+print(param_grid_logit)
+```
+```{r}
+# CV
+set.seed(203)
+
+folds <- vfold_cv(train_data, v = 5)
+folds
+```
+```{r}
+logit_fit <- logit_wf |>
+  tune_grid(
+    resamples = folds,
+    grid = param_grid_logit,
+    metrics = metric_set(roc_auc, accuracy)
+    )
+
+system.time({
+  logit_fit <- logit_wf %>%
+    tune_grid(
+      resamples = folds,
+      grid = param_grid_logit,
+      metrics = metric_set(roc_auc, accuracy)
+    )
+})
+```
+```{r}
+logit_fit
+```
+```{r}
+logit_fit |>
+  # aggregate metrics from K folds
+  collect_metrics() |>
+  print(width = Inf) |>
+  filter(.metric == "roc_auc") |>
+  ggplot(mapping = aes(x = penalty, y = mean, color = factor(mixture))) +
+  geom_point() +
+  labs(x = "Penalty", y = "CV AUC") +
+  scale_x_log10()
+```
+```{r}
+logit_fit |>
+  show_best(metric = "roc_auc")
+```
+```{r}
+best_logit <- logit_fit |>
+  select_best(metric = "roc_auc")
+best_logit
+```
+```{r}
+# Final workflow
+final_wf_logit <- logit_wf |>
+  finalize_workflow(best_logit)
+final_wf_logit
+```
+```{r}
+# Fit the whole training set, then predict the test cases
+final_fit_logit <- 
+  final_wf_logit |>
+  last_fit(data_split)
+final_fit_logit
+
+show_notes(.Last.tune.result)
+```
+```{r}
+# Test metrics
+final_fit_logit |> 
+  collect_metrics()
+```
+
+#### (2) Boosting Model
+```{r}
+# Load libraries
+library(xgboost)
+```
+```{r}
+gb_mod <- 
+  boost_tree(
+    mode = "classification",
+    trees = 1000, 
+    tree_depth = tune(),
+    learn_rate = tune()
+  ) |> 
+  set_engine("xgboost", early_stopping_rounds = 50)
+gb_mod
+```
+```{r}
+gb_wf <- workflow() |>
+  add_recipe(recipe) |>
+  add_model(gb_mod)
+gb_wf
+```
+```{r}
+param_grid_gb <- grid_regular(
+  tree_depth(range = c(2L, 4L)),
+  learn_rate(range = c(-1.3, -1.0), trans = log10_trans()),
+  levels = c(3, 10)
+  )
+param_grid_gb
+```
+```{r}
+set.seed(203)
+
+folds <- vfold_cv(train_data, v = 5)
+folds
+```
+```{r}
+gb_fit <- gb_wf |>
+  tune_grid(
+    resamples = folds,
+    grid = param_grid_gb,
+    metrics = metric_set(roc_auc, accuracy)
+    )
+gb_fit
+```
+```{r}
+gb_fit |>
+  collect_metrics() |>
+  print(width = Inf) |>
+  filter(.metric == "roc_auc") |>
+  ggplot(mapping = aes(x = learn_rate, y = mean, color = factor(tree_depth))) +
+  geom_point() +
+  labs(x = "Learning Rate", y = "CV AUC") +
+  scale_x_log10()
+```
+```{r}
+gb_fit |>
+  show_best(metric = "roc_auc")
+```
+```{r}
+best_gb <- gb_fit |>
+  select_best(metric = "roc_auc")
+best_gb
+```
+```{r}
+# Final workflow
+final_wf_gb <- gb_wf |>
+  finalize_workflow(best_gb)
+final_wf_gb
+```
+```{r}
+# Fit the whole training set, then predict the test cases
+final_fit_gb <- 
+  final_wf_gb |>
+  last_fit(data_split)
+final_fit_gb
+```
+```{r}
+# Test metrics
+final_fit_gb |> 
+  collect_metrics()
+```
+
+#### (3) Random Forest Model
+```{r}
+# Load libraries
+library(ranger)
+```
+```{r}
+rf_mod <- 
+  rand_forest(
+    mode = "classification",
+    # Number of predictors randomly sampled in each split
+    mtry = tune(),
+    # Number of trees in ensemble
+    trees = tune()
+  ) |> 
+  set_engine("ranger")
+rf_mod
+```
+```{r}
+rf_wf <- workflow() |>
+  add_recipe(recipe) |>
+  add_model(rf_mod)
+rf_wf
+```
+```{r}
+param_grid_rf <- grid_regular(
+  trees(range = c(250L, 350L)), 
+  mtry(range = c(7L, 11L)),
+  levels = c(5, 5)
+  )
+param_grid_rf
+```
+```{r}
+set.seed(203)
+
+folds <- vfold_cv(train_data, v = 5)
+folds
+```
+```{r}
+library(future)
+plan(multisession, workers = parallel::detectCores() - 1)
+```
+```{r}
+rf_fit <- rf_wf |>
+  tune_grid(
+    resamples = folds,
+    grid = param_grid_rf,
+    metrics = metric_set(roc_auc, accuracy)
+    )
+```
+```{r}
+rf_fit |>
+  collect_metrics() |>
+  print(width = Inf) |>
+  filter(.metric == "roc_auc") |>
+  ggplot(mapping = aes(x = trees, y = mean, color = factor(mtry))) +
+  geom_point() + 
+  # geom_line() + 
+  labs(x = "Num. of Trees", y = "CV AUC")
+```
+```{r}
+rf_fit |>
+  show_best(metric = "roc_auc")
+```
+```{r}
+best_rf <- rf_fit |>
+  select_best(metric = "roc_auc")
+best_rf
+```
+```{r}
+# Final workflow
+final_wf_rf <- rf_wf |>
+  finalize_workflow(best_rf)
+final_wf_rf
+```
+```{r}
+# Fit the whole training set, then predict the test cases
+final_fit_rf <- 
+  final_wf_rf |>
+  last_fit(data_split)
+final_fit_rf
+```
+```{r}
+# Test metrics
+final_fit_rf |> 
+  collect_metrics()
+```
+
+### 4. Test evaluation, performance comparison, and feature importance.
+4. Compare model classification performance on the test set. Report both the area under ROC curve and accuracy for each machine learning algorithm and the model stacking. Interpret the results. What are the most important features in predicting long ICU stays? How do the models compare in terms of performance and interpretability?
+```{r}
+library(dplyr)
+library(ggplot2)
+
+model_performance <- bind_rows(
+  final_fit_logit %>% filter(.metric %in% c("roc_auc", "accuracy")) %>% mutate(model = "Logistic"),
+  final_fit_gb %>% filter(.metric %in% c("roc_auc", "accuracy")) %>% mutate(model = "Boosting"),
+  final_fit_rf %>% filter(.metric %in% c("roc_auc", "accuracy")) %>% mutate(model = "Random Forest")
+)
+```
