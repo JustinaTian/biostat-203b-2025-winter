@@ -29,8 +29,7 @@ library(gtsummary)
 library(GGally)
 library(tidyverse)
 library(tidymodels)
-```
-```{r}
+
 # Load the `mimic_icu_cohort` data.
 mimic_icu_cohort <- readRDS("~/203b/hw/hw4/mimiciv_shiny/mimic_icu_cohort.rds"
                             ) |>
@@ -73,6 +72,7 @@ mimic_icu_cohort |> tbl_summary(by = los_long)
 2. Partition data into 50% training set and 50% test set. Stratify partitioning according to `los_long`. For grading purpose, sort the data by `subject_id`, `hadm_id`, and `stay_id` and use the seed `203` for the initial data split. Below is the sample code.
 ```{r}
 #| eval: true
+#| # Set seed for reproducibility
 set.seed(203)
 
 # sort
@@ -89,24 +89,21 @@ data_split <- initial_split(
   )
 
 data_split
-```
-```{r}
+
 train_data <- training(data_split) |>
   filter(!is.na(los_long)) |> 
   select(-subject_id, -hadm_id, -stay_id)
 
 dim(train_data)
 prop.table(table(train_data$los_long))
-```
-```{r}
+
 test_data <- testing(data_split) |>
   filter(!is.na(los_long)) |> 
   select(-subject_id, -hadm_id, -stay_id)
 
 dim(test_data)
 prop.table(table(test_data$los_long))
-```
-```{r}
+
 recipe <-
   recipe(los_long ~ ., data = train_data) |> 
   step_unknown(all_nominal_predictors()) |>
@@ -140,13 +137,6 @@ recipe <-
   step_naomit(all_predictors()) |>
   print()
 ```
-```{r}
-prepped_data <- recipe %>% 
-  prep(training = train_data) %>% 
-  bake(new_data = train_data)
-
-cat("预处理后的数据中 NA 数量：", sum(!complete.cases(prepped_data)), "\n")
-```
 
 ### 3. Train and tune the models
 3. Train and tune the models using the training set.
@@ -155,35 +145,31 @@ cat("预处理后的数据中 NA 数量：", sum(!complete.cases(prepped_data)),
 ```{r}
 # Load libraries
 library(glmnet)
-```
-```{r}
+
 logit_mod <-
   logistic_reg(
     penalty = tune(),
     mixture = tune()) |>
   set_engine("glmnet", standardize = FALSE) |> 
   print()
-```
-```{r}
+
 logit_wf <- workflow() |>
   add_recipe(recipe) |>
   add_model(logit_mod) |>
   print()
-```
-```{r}
+
 param_grid_logit <- grid_regular(
   penalty(range = c(-2.8, -2.3)),
   mixture(range = c(0.2, 0.3)),
   levels = c(10, 10)
 )
 print(param_grid_logit)
-```
-```{r}
+
 # CV
 set.seed(203)
 
 folds <- vfold_cv(train_data, v = 5)
-folds
+print(folds)
 ```
 ```{r}
 logit_fit <- logit_wf |>
@@ -192,6 +178,7 @@ logit_fit <- logit_wf |>
     grid = param_grid_logit,
     metrics = metric_set(roc_auc, accuracy)
     )
+print(logit_fit)
 
 system.time({
   logit_fit <- logit_wf %>%
@@ -201,11 +188,7 @@ system.time({
       metrics = metric_set(roc_auc, accuracy)
     )
 })
-```
-```{r}
-logit_fit
-```
-```{r}
+
 logit_fit |>
   # aggregate metrics from K folds
   collect_metrics() |>
@@ -215,43 +198,25 @@ logit_fit |>
   geom_point() +
   labs(x = "Penalty", y = "CV AUC") +
   scale_x_log10()
-```
-```{r}
+
 logit_fit |>
   show_best(metric = "roc_auc")
-```
-```{r}
+
 best_logit <- logit_fit |>
   select_best(metric = "roc_auc")
-best_logit
-```
-```{r}
+print(best_logit)
+
 # Final workflow
 final_wf_logit <- logit_wf |>
   finalize_workflow(best_logit)
-final_wf_logit
-```
-```{r}
-# Fit the whole training set, then predict the test cases
-final_fit_logit <- 
-  final_wf_logit |>
-  last_fit(data_split)
-final_fit_logit
-
-show_notes(.Last.tune.result)
-```
-```{r}
-# Test metrics
-final_fit_logit |> 
-  collect_metrics()
+print(final_wf_logit)
 ```
 
 #### (2) Boosting Model
 ```{r}
 # Load libraries
 library(xgboost)
-```
-```{r}
+
 gb_mod <- 
   boost_tree(
     mode = "classification",
@@ -260,38 +225,32 @@ gb_mod <-
     learn_rate = tune()
   ) |> 
   set_engine("xgboost", early_stopping_rounds = 50)
-gb_mod
-```
-```{r}
+print(gb_mod)
+
 gb_wf <- workflow() |>
   add_recipe(recipe) |>
   add_model(gb_mod)
-gb_wf
-```
-```{r}
+print(gb_wf)
+
 param_grid_gb <- grid_regular(
   tree_depth(range = c(2L, 4L)),
   learn_rate(range = c(-1.3, -1.0), trans = log10_trans()),
   levels = c(3, 10)
   )
-param_grid_gb
-```
-```{r}
-set.seed(203)
+print(param_grid_gb)
 
+set.seed(203)
 folds <- vfold_cv(train_data, v = 5)
 folds
-```
-```{r}
+
 gb_fit <- gb_wf |>
   tune_grid(
     resamples = folds,
     grid = param_grid_gb,
     metrics = metric_set(roc_auc, accuracy)
     )
-gb_fit
-```
-```{r}
+print(gb_fit)
+
 gb_fit |>
   collect_metrics() |>
   print(width = Inf) |>
@@ -300,41 +259,25 @@ gb_fit |>
   geom_point() +
   labs(x = "Learning Rate", y = "CV AUC") +
   scale_x_log10()
-```
-```{r}
+
 gb_fit |>
   show_best(metric = "roc_auc")
-```
-```{r}
+
 best_gb <- gb_fit |>
   select_best(metric = "roc_auc")
-best_gb
-```
-```{r}
+print(best_gb)
+
 # Final workflow
 final_wf_gb <- gb_wf |>
   finalize_workflow(best_gb)
-final_wf_gb
-```
-```{r}
-# Fit the whole training set, then predict the test cases
-final_fit_gb <- 
-  final_wf_gb |>
-  last_fit(data_split)
-final_fit_gb
-```
-```{r}
-# Test metrics
-final_fit_gb |> 
-  collect_metrics()
+print(final_wf_gb)
 ```
 
 #### (3) Random Forest Model
 ```{r}
 # Load libraries
 library(ranger)
-```
-```{r}
+
 rf_mod <- 
   rand_forest(
     mode = "classification",
@@ -343,42 +286,34 @@ rf_mod <-
     # Number of trees in ensemble
     trees = tune()
   ) |> 
-  set_engine("ranger")
-rf_mod
-```
-```{r}
+  set_engine("ranger", importance = "impurity")
+print(rf_mod)
+
 rf_wf <- workflow() |>
   add_recipe(recipe) |>
   add_model(rf_mod)
-rf_wf
-```
-```{r}
+print(rf_wf)
+
 param_grid_rf <- grid_regular(
-  trees(range = c(250L, 350L)), 
+  trees(range = c(300L, 400L)), 
   mtry(range = c(7L, 11L)),
   levels = c(5, 5)
   )
-param_grid_rf
-```
-```{r}
-set.seed(203)
+print(param_grid_rf)
 
+set.seed(203)
 folds <- vfold_cv(train_data, v = 5)
 folds
-```
-```{r}
+
 library(future)
 plan(multisession, workers = parallel::detectCores() - 1)
-```
-```{r}
 rf_fit <- rf_wf |>
   tune_grid(
     resamples = folds,
     grid = param_grid_rf,
     metrics = metric_set(roc_auc, accuracy)
     )
-```
-```{r}
+
 rf_fit |>
   collect_metrics() |>
   print(width = Inf) |>
@@ -387,44 +322,103 @@ rf_fit |>
   geom_point() + 
   # geom_line() + 
   labs(x = "Num. of Trees", y = "CV AUC")
-```
-```{r}
+
 rf_fit |>
   show_best(metric = "roc_auc")
-```
-```{r}
+
 best_rf <- rf_fit |>
   select_best(metric = "roc_auc")
-best_rf
-```
-```{r}
+print(best_rf)
+
 # Final workflow
 final_wf_rf <- rf_wf |>
   finalize_workflow(best_rf)
-final_wf_rf
+print(final_wf_rf)
 ```
+
+### 4. Test evaluation, performance comparison, and feature importance.
+4. Compare model classification performance on the test set. Report both the area under ROC curve and accuracy for each machine learning algorithm and the model stacking. Interpret the results. What are the most important features in predicting long ICU stays? How do the models compare in terms of performance and interpretability?
+
+#### 4.1 Model Performance Comparison
+We evaluated the performance of three different models: Logistic Regression, Boosting (XGBoost), and Random Forest—against the test data. 
+The outcome is that:
+Logistic Regression: Accuracy ≈ 0.584, AUC ≈ 0.614
+Boosting (XGBoost): Accuracy ≈ 0.609, AUC ≈ 0.654
+Random Forest: Accuracy ≈ 0.606, AUC ≈ 0.647
+In ROC AUC, the Boosting model did slightly better to distinguish patients with long ICU length of stay (los_long = TRUE) with an AUC measure of approximately 0.654. The Random Forest model followed closely with an AUC measure of approximately 0.647, whereas the Logistic Regression model had a comparatively lower AUC of 0.614. In Accuracy, all three models had measures ranging from approximately 0.58 to 0.61, indicating very minimal difference in general accuracy of classification.
 ```{r}
+# Logistic
+# Fit the whole training set, then predict the test cases
+final_fit_logit <- 
+  final_wf_logit |>
+  last_fit(data_split)
+print(final_fit_logit)
+# Test metrics
+logit_metrics <- final_fit_logit |> 
+  collect_metrics()
+print(logit_metrics)
+
+# Boosting
+# Fit the whole training set, then predict the test cases
+final_fit_gb <- 
+  final_wf_gb |>
+  last_fit(data_split)
+final_fit_gb
+# Test metrics
+gb_metrics <- final_fit_gb |> 
+  collect_metrics()
+print(gb_metrics)
+
+# Random Forest
 # Fit the whole training set, then predict the test cases
 final_fit_rf <- 
   final_wf_rf |>
   last_fit(data_split)
 final_fit_rf
-```
-```{r}
 # Test metrics
-final_fit_rf |> 
+rf_metrics <- final_fit_rf |> 
   collect_metrics()
+print(rf_metrics)
 ```
-
-### 4. Test evaluation, performance comparison, and feature importance.
-4. Compare model classification performance on the test set. Report both the area under ROC curve and accuracy for each machine learning algorithm and the model stacking. Interpret the results. What are the most important features in predicting long ICU stays? How do the models compare in terms of performance and interpretability?
 ```{r}
-library(dplyr)
-library(ggplot2)
+model_perf <- bind_rows(
+  rf_metrics %>% mutate(model = "Random Forest"),
+  gb_metrics %>% mutate(model = "Boosting"),
+  logit_metrics %>% mutate(model = "Logistic")
+) %>% filter(.metric %in% c("roc_auc", "accuracy"))
+print(model_perf)
 
-model_performance <- bind_rows(
-  final_fit_logit %>% filter(.metric %in% c("roc_auc", "accuracy")) %>% mutate(model = "Logistic"),
-  final_fit_gb %>% filter(.metric %in% c("roc_auc", "accuracy")) %>% mutate(model = "Boosting"),
-  final_fit_rf %>% filter(.metric %in% c("roc_auc", "accuracy")) %>% mutate(model = "Random Forest")
-)
+model_perf <- model_perf %>% rename(metric_mean = .estimate)
+
+ggplot(model_perf, aes(x = model, y = metric_mean, fill = .metric)) +
+  geom_col(position = "dodge") +
+  labs(title = "Test Set Performance Comparison", x = "Model", y = "Metric Value") +
+  theme_minimal()
 ```
+#### 4.2 Model Interpretability and Feature Importance
+Logistic Regression:
+From the coefficients, we can get a rough intuition for the direction and magnitude of the effect of each feature on elevated ICU stay.
+Still, with its linear assumption, it could be inadequate in describing sophisticated nonlinear interactions or relationships between features.
+
+Boosting / Random Forest:
+According to the VIP (Variable Importance Plot), the features "non-invasive blood pressure systolic," "heart rate," "respiratory rate," and "hematocrit" are top-ranked for their importance.
+This is most closely congruent with the traits showing highest absolute coefficients in the Logistic model, thus further validating the important role of these variables in predicting extended ICU stays. While tree-based models tend to have superior predictive performance, they are typically less interpretable. This necessitates the application of variable importance plots, partial dependence plots, or other tools to interpret the decision-making.
+```{r}
+library(broom)
+logit_object <- extract_fit_parsnip(final_fit_logit$.workflow[[1]])$fit
+tidy(logit_object) %>%
+  arrange(desc(abs(estimate))) %>%
+  head(10)
+```
+```{r}
+library(vip)
+rf_object <- extract_fit_parsnip(final_fit_rf$.workflow[[1]])$fit
+vip(rf_object, num_features = 10, geom = "col", main = "Random Forest Importance")
+```
+```{r}
+gb_object <- extract_fit_parsnip(final_fit_gb$.workflow[[1]])$fit
+p <- vip(gb_object, num_features = 10, geom = "col")
+p + ggtitle("XGBoost Variable Importance")
+```
+#### 4.3 Summary
+From the test set results, the Boosting model delivered the best performance on the test set, with an AUC of (0.654); Random Forest (AUC=0.647) was very close behind, and Logistic Regression (AUC=0.614) lagged somewhat. However, it should be noted that the Accuracy of all three models was very similar, within roughly (0.58–0.61), suggesting they all classify almost equally good. In the clinical context, if higher interpretability was desired, then Logistic Regression is the simplest approach; otherwise, Boosting or Random Forest might be the models of interest for higher predictive performance. The clinically interesting features such as “non invasive blood pressure systolic” and the “heart rate” fit well with overall clinical intuition, and therefore, these two features are likely to be significant contributors to a patient's probability of a longer ICU stay.
