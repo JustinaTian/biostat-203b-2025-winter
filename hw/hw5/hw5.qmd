@@ -3,7 +3,7 @@ title: "Biostat 203B Homework 5"
 subtitle: Due Mar 20 @ 11:59PM
 author: "Jiaye Tian UID: 306541095"
 format:
-  html:
+  pdf:
     theme: cosmo
     embed-resources: true
     number-sections: false
